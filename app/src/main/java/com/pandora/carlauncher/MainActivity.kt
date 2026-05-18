@@ -700,18 +700,28 @@ class MainActivity : AppCompatActivity() {
             intent.addCategory(Intent.CATEGORY_LAUNCHER)
             val resolveList = packageManager.queryIntentActivities(intent, 0)
             
+            // 空检查，防止返回 null 导致崩溃
+            if (resolveList == null || resolveList.isEmpty()) {
+                return apps
+            }
+            
             for (resolveInfo in resolveList) {
-                val pkg = resolveInfo.activityInfo.packageName
-                if (pkg.startsWith(prefix)) {
-                    try {
+                try {
+                    val pkg = resolveInfo.activityInfo?.packageName ?: continue
+                    if (pkg.startsWith(prefix)) {
                         val appInfo = packageManager.getApplicationInfo(pkg, 0)
                         val appName = appInfo.loadLabel(packageManager).toString()
                         val icon = appInfo.loadIcon(packageManager)
                         apps.add(MusicAppsAdapter.MusicAppInfo(pkg, appName, icon))
-                    } catch (_: Exception) {}
+                    }
+                } catch (_: Exception) {
+                    // 跳过无法获取信息的应用
+                    continue
                 }
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.e(TAG, "查找应用前缀 $prefix 失败: ${e.message}")
+        }
         return apps
     }
 
