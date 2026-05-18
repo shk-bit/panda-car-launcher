@@ -11,8 +11,8 @@ android {
         applicationId "com.pandora.carlauncher"
         minSdk 26
         targetSdk 34
-        versionCode 53
-        versionName "4.7.2"
+        versionCode 54
+        versionName "4.7.3"
     }
 
     buildTypes {
