@@ -276,9 +276,6 @@ class MainActivity : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.nav_music)?.setOnClickListener {
             showMusicAppsDialog()
         }
-        findViewById<LinearLayout>(R.id.nav_theme)?.setOnClickListener {
-            showThemeCenterDialog()
-        }
         findViewById<LinearLayout>(R.id.nav_add)?.setOnClickListener {
             showAddAppDialog()
         }
