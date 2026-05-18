@@ -348,7 +348,15 @@ class MainActivity : AppCompatActivity() {
      * 打开地图应用
      */
     private fun openMapApp() {
-        val packages = arrayOf("com.autonavi.amapauto", "com.autonavi.minimap", "com.baidu.BaiduMap")
+        // 1. 首先尝试完整包名
+        val packages = arrayOf(
+            "com.autonavi.amapauto",
+            "com.autonavi.minimap",
+            "com.baidu.BaiduMap",
+            "com.baidu.map.location",
+            "com.baidu.carlife",
+            "com.tencent.map"
+        )
         for (pkg in packages) {
             try {
                 val intent = packageManager.getLaunchIntentForPackage(pkg)
@@ -359,6 +367,28 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (_: Exception) {}
         }
+        
+        // 2. 前缀匹配：高德地图 (com.autonavi)
+        val amapApps = findAppsByPrefix("com.autonavi", "高德")
+        if (amapApps.isNotEmpty()) {
+            openApp(amapApps[0].packageName, amapApps[0].appName)
+            return
+        }
+        
+        // 3. 前缀匹配：腾讯地图 (com.tencent)
+        val tencentApps = findAppsByPrefix("com.tencent", "腾讯")
+        if (tencentApps.isNotEmpty()) {
+            openApp(tencentApps[0].packageName, tencentApps[0].appName)
+            return
+        }
+        
+        // 4. 前缀匹配：百度地图 (com.baidu)
+        val baiduApps = findAppsByPrefix("com.baidu", "百度")
+        if (baiduApps.isNotEmpty()) {
+            openApp(baiduApps[0].packageName, baiduApps[0].appName)
+            return
+        }
+        
         Toast.makeText(this, "未找到地图应用", Toast.LENGTH_SHORT).show()
     }
 
@@ -535,6 +565,7 @@ class MainActivity : AppCompatActivity() {
             "com.tencent.qqmusic.vehicle",
             "com.tencent.qqmusic.pad",
             "com.tencent.qqmusic.hd",
+            "com.tencent.qqmusiccar",
             // QQ音乐共存版/修改版
             "com.tencent.qqmusic.mi",
             "com.tencent.qqmusic.vip",
@@ -612,6 +643,7 @@ class MainActivity : AppCompatActivity() {
             "com.xs.fm",
             // 抖音音乐/汽水
             "com.bytedance.byteautoservices",
+            "com.bytedance.byteautoservice3",
             // 其他音乐播放器
             "com.jiongya.vehiclemusic",
             "com.musicplayer.android",
@@ -626,10 +658,14 @@ class MainActivity : AppCompatActivity() {
             "com.samsung.android.app.music.chn",
             "com.google.android.music",
             "com.amazon.mp3",
-            "com.sonyericsson.zsystem"
+            "com.sonyericsson.zsystem",
+            // 其他音乐应用
+            "com.luna.music"
         )
 
         val apps = mutableListOf<MusicAppsAdapter.MusicAppInfo>()
+        
+        // 1. 首先匹配完整包名
         for (pkg in musicPackages) {
             try {
                 val appInfo = packageManager.getApplicationInfo(pkg, 0)
@@ -638,7 +674,44 @@ class MainActivity : AppCompatActivity() {
                 apps.add(MusicAppsAdapter.MusicAppInfo(pkg, appName, icon))
             } catch (_: Exception) {}
         }
+        
+        // 2. 前缀匹配：酷我音乐 (cn.kuwo)
+        apps.addAll(findAppsByPrefix("cn.kuwo", "酷我"))
+        
+        // 3. 前缀匹配：酷狗音乐 (com.kugou)
+        apps.addAll(findAppsByPrefix("com.kugou", "酷狗"))
+        
+        // 4. 前缀匹配：QQ音乐 (com.tencent.qqmusic)
+        apps.addAll(findAppsByPrefix("com.tencent.qqmusic", "QQ音乐"))
+        
+        // 5. 前缀匹配：抖音音乐 (com.bytedance)
+        apps.addAll(findAppsByPrefix("com.bytedance", "抖音"))
 
+        return apps.distinctBy { it.packageName }
+    }
+    
+    /**
+     * 根据前缀查找应用
+     */
+    private fun findAppsByPrefix(prefix: String, defaultType: String): List<MusicAppsAdapter.MusicAppInfo> {
+        val apps = mutableListOf<MusicAppsAdapter.MusicAppInfo>()
+        try {
+            val intent = Intent(Intent.ACTION_MAIN)
+            intent.addCategory(Intent.CATEGORY_LAUNCHER)
+            val resolveList = packageManager.queryIntentActivities(intent, 0)
+            
+            for (resolveInfo in resolveList) {
+                val pkg = resolveInfo.activityInfo.packageName
+                if (pkg.startsWith(prefix)) {
+                    try {
+                        val appInfo = packageManager.getApplicationInfo(pkg, 0)
+                        val appName = appInfo.loadLabel(packageManager).toString()
+                        val icon = appInfo.loadIcon(packageManager)
+                        apps.add(MusicAppsAdapter.MusicAppInfo(pkg, appName, icon))
+                    } catch (_: Exception) {}
+                }
+            }
+        } catch (_: Exception) {}
         return apps
     }
 
