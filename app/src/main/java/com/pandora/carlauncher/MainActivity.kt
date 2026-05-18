@@ -210,35 +210,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 设置应用网格（动态加载已安装应用）
-     * 竖屏模式下使用，横屏已移除
+     * 设置应用网格（已移除，应用在底部导航栏显示）
      */
     private fun setupAppGrid() {
-        val rvGrid = findViewById<RecyclerView>(R.id.rv_app_grid)
-        // 如果布局中没有此视图（横屏模式），直接返回
-        if (rvGrid == null) return
-        
-        // 改为水平布局，一行，左右滑动
-        rvGrid.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-
-        val gridApps = getGridApps().toMutableList()
-        // 添加自定义应用到网格
-        for (app in customApps) {
-            val icon = try {
-                packageManager.getApplicationIcon(app.packageName)
-            } catch (e: Exception) {
-                null
-            }
-            gridApps.add(GridApp(appName = app.appName, icon = icon, iconBg = R.drawable.bg_icon_blue) {
-                openApp(app.packageName, app.appName)
-            })
-        }
-        // 添加➕按钮项
-        gridApps.add(GridApp(appName = "添加", iconRes = R.drawable.ic_add, iconBg = R.drawable.bg_icon_gray) {
-            showAddAppDialog()
-        })
-        gridAdapter = AppGridAdapter(gridApps)
-        rvGrid.adapter = gridAdapter
+        // 应用网格功能已移除，应用显示在底部导航栏
     }
 
     /**
