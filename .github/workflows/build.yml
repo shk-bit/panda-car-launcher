@@ -67,15 +67,8 @@ jobs:
         cp app/build/outputs/apk/debug/app-debug.apk ./apk/panda-car-launcher-v${VERSION}-debug.apk
         cp app/build/outputs/apk/release/app-release-unsigned.apk ./apk/panda-car-launcher-v${VERSION}-release.apk
 
-    - name: Create Git Tag
-      run: |
-        VERSION=${{ steps.app_version.outputs.version }}
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git tag -f "v${VERSION}" || true
-        git push -f origin "v${VERSION}" || true
-
     - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ steps.app_version.outputs.version }}
