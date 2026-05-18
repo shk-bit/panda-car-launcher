@@ -101,7 +101,6 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         setupFullScreen()
         loadCustomApps()
-        gridAdapter.notifyDataSetChanged()
         // 刷新底部应用列表
         setupBottomAppsRecyclerView()
         // 刷新壁纸
