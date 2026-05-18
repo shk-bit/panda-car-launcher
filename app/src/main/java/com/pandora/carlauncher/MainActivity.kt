@@ -553,7 +553,7 @@ class MainActivity : AppCompatActivity() {
             // Apple Music
             "com.apple.android.music",
             // 其他
-            "com.jiongya.vehiclemusic",
+            "com.jiongya.vehiclemusic","com.bytedance.byteautoservices",
             "com.musicplayer.android"
         )
 
@@ -624,10 +624,11 @@ class MainActivity : AppCompatActivity() {
     private fun getInstalledMusicApps(): List<Pair<String, String>> {
         val apps = mutableListOf<Pair<String, String>>()
         val musicPackages = mapOf(
-            "cn.kuwo.player" to "酷我音乐",
+            "cn.kuwo.kuwomusiccar" to "酷我音乐",
+"cn.kuwo.kuwomusiccarsnp" to "酷我vip",
             "com.tencent.qqmusic" to "QQ音乐",
             "com.netease.cloudmusic" to "网易云音乐",
-            "com.kugou.android" to "酷狗音乐"
+            "com.kugou.android.auto" to "酷狗音乐"
         )
         for ((pkg, name) in musicPackages) {
             try {
@@ -857,7 +858,7 @@ class MainActivity : AppCompatActivity() {
         val packages = listOf(
             // 高德
             "com.autonavi.amapauto" to "高德地图车机版",
-            "com.autonavi.amapauto.nx" to "高德地图车机共存版",
+            "com.autonavi.amapauto.chenmo" to "高德地图车机共存版",
             "com.autonavi.amapauto.u3d" to "高德地图车机共存U3D版",
             // 百度
             "com.baidu.BaiduMap" to "百度地图",
@@ -988,8 +989,8 @@ class MainActivity : AppCompatActivity() {
 
             // 设置图标间距
             val params = holder.itemView.layoutParams as RecyclerView.LayoutParams
-            params.width = dpToPx(56)  // 图标宽度
-            params.height = dpToPx(56) // 图标高度
+            params.width = dpToPx(40)  // 图标宽度
+            params.height = dpToPx(40) // 图标高度
             params.setMargins(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4)) // 四周间距
             holder.itemView.layoutParams = params
 
