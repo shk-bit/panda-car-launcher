@@ -211,11 +211,15 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 设置应用网格（动态加载已安装应用）
+     * 竖屏模式下使用，横屏已移除
      */
     private fun setupAppGrid() {
         val rvGrid = findViewById<RecyclerView>(R.id.rv_app_grid)
+        // 如果布局中没有此视图（横屏模式），直接返回
+        if (rvGrid == null) return
+        
         // 改为水平布局，一行，左右滑动
-        rvGrid?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvGrid.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
         val gridApps = getGridApps().toMutableList()
         // 添加自定义应用到网格
@@ -234,7 +238,7 @@ class MainActivity : AppCompatActivity() {
             showAddAppDialog()
         })
         gridAdapter = AppGridAdapter(gridApps)
-        rvGrid?.adapter = gridAdapter
+        rvGrid.adapter = gridAdapter
     }
 
     /**
@@ -318,8 +322,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.nav_switch)?.setOnClickListener {
             showNavSwitchDialog()
         }
-        // 打开导航
-        findViewById<Button>(R.id.nav_open)?.setOnClickListener {
+        // 打开导航 - 点击导航卡片
+        findViewById<LinearLayout>(R.id.nav_card)?.setOnClickListener {
             openMapApp()
         }
         // 音乐控制
