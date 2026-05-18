@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
         const val PREF_NAME = "panda_launcher_prefs"
         const val KEY_CUSTOM_APPS = "custom_apps"
-        const val MAX_CUSTOM_APPS = 5
+        const val MAX_CUSTOM_APPS = 10
         private const val PERMISSION_REQUEST_CODE = 1001
     }
 
@@ -548,39 +548,106 @@ class MainActivity : AppCompatActivity() {
      */
     private fun getInstalledMusicAppsList(): List<MusicAppsAdapter.MusicAppInfo> {
         val musicPackages = listOf(
-            // QQ音乐
+            // QQ音乐 - 全版本
             "com.tencent.qqmusic",
             "com.tencent.qqmusic.car",
             "com.tencent.qqmusiclite",
             "com.tencent.qqmusic.iot",
             "com.tencent.qqmusic.vehicle",
-            // 酷我音乐
+            "com.tencent.qqmusic.pad",
+            "com.tencent.qqmusic.hd",
+            // QQ音乐共存版/修改版
+            "com.tencent.qqmusic.mi",
+            "com.tencent.qqmusic.vip",
+            // 酷我音乐 - 全版本
             "cn.kuwo.player",
             "cn.kuwo.kwmusiccar",
             "cn.kuwo.car",
             "com.kuwo.player",
             "com.kuwo.vehicle",
-            // 酷狗音乐
+            "cn.kuwo.kwmusic",
+            "cn.kuwo.kwmusicforcar",
+            "cn.kuwo.kwmusicauto",
+            "cn.kuwo.kwmusiccarsnp",
+            "cn.kuwo.kwmusiccarhd",
+            "cn.kuwo.kwmusiccarvip",
+            // 酷我音乐共存版
+            "cn.kuwo.player.a",
+            "cn.kuwo.player.b",
+            "cn.kuwo.player.c",
+            "cn.kuwo.kwmusic.a",
+            "cn.kuwo.kwmusic.b",
+            "cn.kuwo.kwmusic.c",
+            // 酷狗音乐 - 全版本
             "com.kugou.android",
             "com.kugou.android.lite",
             "com.kugou.player",
-            // 网易云音乐
+            "com.kugou.android.auto",
+            "com.kugou.android.car",
+            "com.kugou.android.hd",
+            "com.kugou.android.pad",
+            // 酷狗音乐共存版
+            "com.kugou.android.a",
+            "com.kugou.android.b",
+            "com.kugou.android.c",
+            // 网易云音乐 - 全版本
             "com.netease.cloudmusic",
             "com.netease.cloudmusic.car",
+            "com.netease.cloudmusic.lite",
+            "com.netease.cloudmusic.hd",
+            "com.netease.cloudmusic.auto",
+            // 网易云音乐共存版
+            "com.netease.cloudmusic.a",
+            "com.netease.cloudmusic.b",
+            "com.netease.cloudmusic.c",
             // 汽水音乐
             "com.qishui.music",
             "com.qishui.music.tycx",
+            "com.qishui.music.auto",
+            "com.qishui.music.car",
             // 波点音乐
             "com.dotpoints.bodian",
+            "com.dotpoints.bodian.car",
             // 咪咕音乐
             "cmccwm.mobilemusic",
+            "cmccwm.mobilemusic.car",
+            "cmccwm.mobilemusic.hd",
             // Spotify
             "com.spotify.music",
+            "com.spotify.music.lite",
             // Apple Music
             "com.apple.android.music",
-            // 其他
-            "com.jiongya.vehiclemusic","com.bytedance.byteautoservices",
-            "com.musicplayer.android"
+            // YouTube Music
+            "com.google.android.apps.youtube.music",
+            // 百度音乐/千千音乐
+            "com.ting.mp3.android",
+            "com.baidu.music",
+            // 虾米音乐（已停运但可能还有用户）
+            "com.xiami.music",
+            // 喜马拉雅
+            "com.ximalaya.ting.android",
+            "com.ximalaya.ting.android.car",
+            // 懒人听书
+            "com.lrts.lots",
+            // 番茄畅听
+            "com.xs.fm",
+            // 抖音音乐/汽水
+            "com.bytedance.byteautoservices",
+            // 其他音乐播放器
+            "com.jiongya.vehiclemusic",
+            "com.musicplayer.android",
+            "com.android.music",
+            "com.sonyericsson.music",
+            "com.miui.player",
+            "com.coloros.music",
+            "com.heytap.music",
+            "com.vivo.music",
+            "com.huawei.music",
+            "com.samsung.android.app.music",
+            "com.samsung.android.app.music.chn",
+            "com.google.android.music",
+            "com.amazon.mp3",
+            "com.sonyericsson.zsystem"
         )
 
         val apps = mutableListOf<MusicAppsAdapter.MusicAppInfo>()
