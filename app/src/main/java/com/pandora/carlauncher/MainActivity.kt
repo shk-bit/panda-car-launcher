@@ -271,7 +271,7 @@ class MainActivity : AppCompatActivity() {
             // 首页按钮点击事件
         }
         findViewById<LinearLayout>(R.id.nav_navigation)?.setOnClickListener {
-            startFloatingNav()
+            openNavigation()
         }
         findViewById<LinearLayout>(R.id.nav_music)?.setOnClickListener {
             showMusicAppsDialog()
@@ -525,17 +525,41 @@ class MainActivity : AppCompatActivity() {
      */
     private fun getInstalledMusicAppsList(): List<MusicAppsAdapter.MusicAppInfo> {
         val musicPackages = listOf(
-            "com.tencent.qqmusic",      // QQ音乐
-            "cn.kuwo.player",           // 酷我音乐
-            "com.kugou.android",        // 酷狗音乐
-            "com.qishui.music",         // 汽水音乐
-            "com.netease.cloudmusic",   // 网易云音乐
-            "com.kugou.android.lite",   // 酷狗音乐概念版
-            "cmccwm.mobilemusic",       // 咪咕音乐
-            "com.spotify.music",        // Spotify
-            "com.apple.android.music"   // Apple Music
+            // QQ音乐
+            "com.tencent.qqmusic",
+            "com.tencent.qqmusic.car",
+            "com.tencent.qqmusiclite",
+            "com.tencent.qqmusic.iot",
+            "com.tencent.qqmusic.vehicle",
+            // 酷我音乐
+            "cn.kuwo.player",
+            "cn.kuwo.kwmusiccar",
+            "cn.kuwo.car",
+            "com.kuwo.player",
+            "com.kuwo.vehicle",
+            // 酷狗音乐
+            "com.kugou.android",
+            "com.kugou.android.lite",
+            "com.kugou.player",
+            // 网易云音乐
+            "com.netease.cloudmusic",
+            "com.netease.cloudmusic.car",
+            // 汽水音乐
+            "com.qishui.music",
+            "com.qishui.music.tycx",
+            // 波点音乐
+            "com.dotpoints.bodian",
+            // 咪咕音乐
+            "cmccwm.mobilemusic",
+            // Spotify
+            "com.spotify.music",
+            // Apple Music
+            "com.apple.android.music",
+            // 其他
+            "com.jiongya.vehiclemusic",
+            "com.musicplayer.android"
         )
-        
+
         val apps = mutableListOf<MusicAppsAdapter.MusicAppInfo>()
         for (pkg in musicPackages) {
             try {
@@ -545,7 +569,7 @@ class MainActivity : AppCompatActivity() {
                 apps.add(MusicAppsAdapter.MusicAppInfo(pkg, appName, icon))
             } catch (_: Exception) {}
         }
-        
+
         return apps
     }
 
@@ -830,37 +854,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 启动悬浮导航
+     * 打开导航
      */
-    private fun startFloatingNav() {
-        // 检查权限
-        if (!FloatingNavService.canDrawOverlays(this)) {
-            // 引导用户开启权限
-            AlertDialog.Builder(this)
-                .setTitle("需要悬浮窗权限")
-                .setMessage("请允许本应用显示在其他应用上层，以使用悬浮导航功能")
-                .setPositiveButton("去开启") { _, _ ->
-                    FloatingNavService.requestOverlayPermission(this)
+    private fun openNavigation() {
+        val packages = listOf(
+            // 高德
+            "com.autonavi.amapauto" to "高德地图车机版",
+            "com.autonavi.amapauto.nx" to "高德地图车机共存版",
+            "com.autonavi.amapauto.u3d" to "高德地图车机共存U3D版",
+            // 百度
+            "com.baidu.BaiduMap" to "百度地图",
+            "com.baidu.naviauto" to "百度地图车机版",
+            // 腾讯
+            "com.tencent.map" to "腾讯地图",
+            // 搜狗
+            "com.sogou.map.android" to "搜狗地图",
+            // 美团
+            "com.sankuai.meituan" to "美团"
+        )
+
+        for ((pkg, name) in packages) {
+            try {
+                val intent = packageManager.getLaunchIntentForPackage(pkg)
+                if (intent != null) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                    findViewById<TextView>(R.id.nav_status)?.text = "已启动: $name"
+                    return
                 }
-                .setNegativeButton("取消", null)
-                .show()
-            return
+            } catch (_: Exception) {}
         }
 
-        // 启动悬浮导航服务
-        startForegroundService(Intent(this, FloatingNavService::class.java))
-    }
-
-    // 处理权限结果
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1001) {
-            if (FloatingNavService.canDrawOverlays(this)) {
-                startForegroundService(Intent(this, FloatingNavService::class.java))
-            } else {
-                Toast.makeText(this, "需要悬浮窗权限才能使用悬浮导航", Toast.LENGTH_SHORT).show()
-            }
-        }
+        Toast.makeText(this, "请安装导航应用", Toast.LENGTH_SHORT).show()
     }
 
     data class CustomApp(val packageName: String, val appName: String)

@@ -188,13 +188,6 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
-        <!-- 悬浮导航服务 -->
-        <service
-            android:name=".FloatingNavService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="location" />
-
         <!-- 音乐通知监听服务（布丁方式） -->
         <service
             android:name=".MusicNotificationListener"
