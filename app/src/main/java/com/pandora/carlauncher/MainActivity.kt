@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity() {
             handler.post(updateTimeRunnable)
 
             requestPermissions()
+            checkNotificationListenerPermission()
             loadCustomApps()
             setupAppGrid()
             setupBottomNavigation()
@@ -175,6 +176,31 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    /**
+     * 检查通知监听权限
+     */
+    private fun checkNotificationListenerPermission() {
+        if (!isNotificationListenerEnabled()) {
+            AlertDialog.Builder(this)
+                .setTitle("需要通知权限")
+                .setMessage("请允许本应用访问通知，以获取音乐播放信息")
+                .setPositiveButton("去开启") { _, _ ->
+                    val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                    startActivity(intent)
+                }
+                .setNegativeButton("取消", null)
+                .show()
+        }
+    }
+
+    /**
+     * 检查通知监听是否已启用
+     */
+    private fun isNotificationListenerEnabled(): Boolean {
+        val enabledListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        return enabledListeners?.contains(packageName) == true
     }
 
     private fun updateTime() {
