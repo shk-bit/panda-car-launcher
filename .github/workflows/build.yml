@@ -51,40 +51,26 @@ jobs:
     - name: Decode Signing Keys
       run: |
         mkdir -p signing
-        echo "${{ secrets.SIGNING_PLATFORM_PEM }}" | base64 -d > signing/platform.pem
-        echo "${{ secrets.SIGNING_PLATFORM_X509 }}" | base64 -d > signing/platform.x509.pem
-        echo "${{ secrets.SIGNING_PLATFORM_PK8 }}" | base64 -d > signing/platform.pk8
+        echo "$SIGNING_PLATFORM_PEM" | base64 -d > signing/platform.pem
+        echo "$SIGNING_PLATFORM_X509" | base64 -d > signing/platform.x509.pem
+        echo "$SIGNING_PLATFORM_PK8" | base64 -d > signing/platform.pk8
         chmod 600 signing/platform.pem signing/platform.pk8
+      env:
+        SIGNING_PLATFORM_PEM: ${{ secrets.SIGNING_PLATFORM_PEM }}
+        SIGNING_PLATFORM_X509: ${{ secrets.SIGNING_PLATFORM_X509 }}
+        SIGNING_PLATFORM_PK8: ${{ secrets.SIGNING_PLATFORM_PK8 }}
 
     - name: Sign APKs with Platform Key
-      env:
-        VERSION: ${{ steps.app_version.outputs.version }}
       run: |
         BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
         APKSIGNER="${BUILD_TOOLS}apksigner"
+        VERSION="${{ steps.app_version.outputs.version }}"
         echo "使用 apksigner: $APKSIGNER"
-        
         mkdir -p ./apk
-        
-        # 签名 Debug APK
-        $APKSIGNER sign \
-          --key signing/platform.pem \
-          --cert signing/platform.x509.pem \
-          --out "./apk/panda-car-launcher-v${VERSION}-debug.apk" \
-          app/build/outputs/apk/debug/app-debug.apk
-        
-        # 签名 Release APK
-        $APKSIGNER sign \
-          --key signing/platform.pem \
-          --cert signing/platform.x509.pem \
-          --out "./apk/panda-car-launcher-v${VERSION}-release.apk" \
-          app/build/outputs/apk/release/app-release-unsigned.apk
-        
-        # 验证签名
+        $APKSIGNER sign --key signing/platform.pem --cert signing/platform.x509.pem --out "./apk/panda-car-launcher-v${VERSION}-debug.apk" app/build/outputs/apk/debug/app-debug.apk
+        $APKSIGNER sign --key signing/platform.pem --cert signing/platform.x509.pem --out "./apk/panda-car-launcher-v${VERSION}-release.apk" app/build/outputs/apk/release/app-release-unsigned.apk
         $APKSIGNER verify --print-certs "./apk/panda-car-launcher-v${VERSION}-debug.apk"
         $APKSIGNER verify --print-certs "./apk/panda-car-launcher-v${VERSION}-release.apk"
-        
-        # 清理签名文件
         rm -rf signing
 
     - name: Create Release
@@ -95,14 +81,11 @@ jobs:
         files: ./apk/*.apk
         body: |
           ## 熊猫车机桌面 v${{ steps.app_version.outputs.version }}
-
           ### 下载
           - Debug 版本: `panda-car-launcher-v${{ steps.app_version.outputs.version }}-debug.apk`
           - Release 版本: `panda-car-launcher-v${{ steps.app_version.outputs.version }}-release.apk`
-          
           ### 说明
           - 所有 APK 均使用 platform 签名
-          - 安装到 `/system/priv-app/` 可获得系统级权限
+          - 安装到 /system/priv-app/ 可获得系统级权限
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
