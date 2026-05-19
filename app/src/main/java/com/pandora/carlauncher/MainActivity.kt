@@ -518,10 +518,15 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 发送媒体控制动作
+     * 多重备用方案确保控制成功
      */
     private fun sendMediaAction(action: String) {
+        Log.d(TAG, "发送媒体动作: $action")
+        
+        // 方案1：使用 MediaController
         val controller = MusicNotificationListener.activeMediaController
         if (controller != null) {
+            Log.d(TAG, "使用 MediaController 控制音乐")
             when (action) {
                 "prev" -> controller.transportControls?.skipToPrevious()
                 "next" -> controller.transportControls?.skipToNext()
@@ -533,24 +538,35 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else {
-            // 兼容方案：发送媒体按钮广播
-            val pkg = MusicNotificationListener.currentPackageName
-            if (pkg.isNotEmpty()) {
-                try {
-                    val intent = Intent("android.intent.action.MEDIA_BUTTON").apply {
-                        putExtra("android.intent.extra.KEY_EVENT", when(action) {
-                            "prev" -> android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-                            "next" -> android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_MEDIA_NEXT)
-                            else -> android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, 
-                                if (MusicNotificationListener.isPlaying) android.view.KeyEvent.KEYCODE_MEDIA_PAUSE 
-                                else android.view.KeyEvent.KEYCODE_MEDIA_PLAY)
-                        })
-                        setPackage(pkg)
-                    }
-                    sendBroadcast(intent)
-                } catch (_: Exception) {}
+            return
+        }
+        
+        // 方案2：使用 AudioManager 发送媒体按钮事件
+        Log.d(TAG, "使用 AudioManager 发送媒体按钮")
+        val keyCode = when (action) {
+            "prev" -> android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS
+            "next" -> android.view.KeyEvent.KEYCODE_MEDIA_NEXT
+            "play_pause" -> if (MusicNotificationListener.isPlaying) 
+                android.view.KeyEvent.KEYCODE_MEDIA_PAUSE 
+            else 
+                android.view.KeyEvent.KEYCODE_MEDIA_PLAY
+            else -> android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+        }
+        
+        // 发送按键事件
+        val downEvent = android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, keyCode)
+        val upEvent = android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, keyCode)
+        audioManager.dispatchMediaKeyEvent(downEvent)
+        audioManager.dispatchMediaKeyEvent(upEvent)
+        
+        // 方案3：发送广播
+        try {
+            val intent = Intent("android.intent.action.MEDIA_BUTTON").apply {
+                putExtra("android.intent.extra.KEY_EVENT", downEvent)
             }
+            sendBroadcast(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "发送媒体广播失败", e)
         }
     }
 
