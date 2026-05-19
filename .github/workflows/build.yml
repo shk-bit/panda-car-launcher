@@ -53,19 +53,21 @@ jobs:
         mkdir -p signing
         printf '%s' "$PEM" > signing/platform.pem
         printf '%s' "$X509" > signing/platform.x509.pem
-        chmod 600 signing/platform.pem
+        printf '%s' "$PK8" > signing/platform.pk8
+        chmod 600 signing/platform.pem signing/platform.pk8
         BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
         APKSIGNER="${BUILD_TOOLS}apksigner"
         VERSION="${{ steps.app_version.outputs.version }}"
         mkdir -p ./apk
-        $APKSIGNER sign --key signing/platform.pem --cert signing/platform.x509.pem --out "./apk/panda-car-launcher-v${VERSION}-debug.apk" app/build/outputs/apk/debug/app-debug.apk
-        $APKSIGNER sign --key signing/platform.pem --cert signing/platform.x509.pem --out "./apk/panda-car-launcher-v${VERSION}-release.apk" app/build/outputs/apk/release/app-release-unsigned.apk
+        $APKSIGNER sign --key signing/platform.pk8 --cert signing/platform.x509.pem --out "./apk/panda-car-launcher-v${VERSION}-debug.apk" app/build/outputs/apk/debug/app-debug.apk
+        $APKSIGNER sign --key signing/platform.pk8 --cert signing/platform.x509.pem --out "./apk/panda-car-launcher-v${VERSION}-release.apk" app/build/outputs/apk/release/app-release-unsigned.apk
         $APKSIGNER verify --print-certs "./apk/panda-car-launcher-v${VERSION}-debug.apk"
         $APKSIGNER verify --print-certs "./apk/panda-car-launcher-v${VERSION}-release.apk"
         rm -rf signing
       env:
         PEM: ${{ secrets.SIGNING_PLATFORM_PEM }}
         X509: ${{ secrets.SIGNING_PLATFORM_X509 }}
+        PK8: ${{ secrets.SIGNING_PLATFORM_PK8 }}
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
