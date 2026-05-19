@@ -40,7 +40,8 @@
                 android:layout_height="match_parent"
                 android:layout_weight="2"
                 android:layout_marginEnd="12dp"
-                android:background="@drawable/bg_plugin_card">
+                android:background="@drawable/bg_plugin_card"
+                android:clipToOutline="true">
 
                 <!-- 导航占位页（未启动时显示） -->
                 <LinearLayout
@@ -220,6 +221,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/bg_plugin_card"
+                android:clipToOutline="true"
                 android:orientation="vertical"
                 android:padding="16dp">
 

@@ -20,8 +20,8 @@
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/bottom_nav_icon_size"
+            android:layout_height="@dimen/bottom_nav_icon_size"
             android:src="@drawable/ic_home"
             android:tint="@color/primary" />
 
@@ -47,8 +47,8 @@
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/bottom_nav_icon_size"
+            android:layout_height="@dimen/bottom_nav_icon_size"
             android:src="@drawable/ic_navigation"
             android:tint="@color/text_secondary" />
 
@@ -74,8 +74,8 @@
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/bottom_nav_icon_size"
+            android:layout_height="@dimen/bottom_nav_icon_size"
             android:src="@drawable/ic_music"
             android:tint="@color/text_secondary" />
 
@@ -110,8 +110,8 @@
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/bottom_nav_icon_size"
+            android:layout_height="@dimen/bottom_nav_icon_size"
             android:src="@drawable/ic_add"
             android:tint="@color/text_secondary" />
 
