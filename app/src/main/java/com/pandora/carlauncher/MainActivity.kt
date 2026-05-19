@@ -391,7 +391,7 @@ class MainActivity : AppCompatActivity() {
 
                     // 如果导航已打开，切换到新地图
                     if (embeddedNavType != null) {
-                        loadEmbeddedNavWeb(binding.type, binding.name, binding.webUrl)
+                        launchMapAppPip(binding.packageName, binding.name)
                     }
                 } else {
                     // 在线版
@@ -408,12 +408,7 @@ class MainActivity : AppCompatActivity() {
                     findViewById<TextView>(R.id.nav_switch)?.text = "$navName ▼"
 
                     if (embeddedNavType != null) {
-                        val url = when (currentNavType) {
-                            "baidu" -> "https://map.baidu.com/mobile/webapp/index/index"
-                            "tencent" -> "https://map.qq.com/m/"
-                            else -> "https://m.amap.com/navi/"
-                        }
-                        loadEmbeddedNavWeb(currentNavType!!, "$navName(在线)", url)
+                        launchMapFallback()
                     }
                 }
                 dialog.dismiss()
@@ -1361,58 +1356,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 加载嵌入式导航 WebView
-     */
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun loadEmbeddedNavWeb(type: String, name: String, url: String) {
-        embeddedNavType = type
-        embeddedNavPkg = mapBindings.find { it.type == type }?.packageName
-
-        // 切换显示
-        findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
-        findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
-        findViewById<View>(R.id.nav_loading)?.visibility = View.VISIBLE
-        findViewById<TextView>(R.id.nav_sdk_title)?.text = name
-        findViewById<TextView>(R.id.nav_loading_text)?.text = "正在加载${name}..."
-
-        // 配置 WebView
-        val webView = findViewById<android.webkit.WebView>(R.id.nav_webview) ?: return
-        webView.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            loadWithOverviewMode = true
-            useWideViewPort = true
-            setSupportZoom(true)
-            builtInZoomControls = false
-            cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-            mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            allowContentAccess = true
-            allowFileAccess = true
-            layoutAlgorithm = android.webkit.WebSettings.LayoutAlgorithm.SINGLE_COLUMN
-        }
-
-        webView.webViewClient = object : android.webkit.WebViewClient() {
-            override fun onPageFinished(view: android.webkit.WebView?, urlStr: String?) {
-                findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
-            }
-            override fun onReceivedError(view: android.webkit.WebView?, request: android.webkit.WebResourceRequest?, error: android.webkit.WebResourceError?) {
-                findViewById<TextView>(R.id.nav_loading_text)?.text = "加载失败，点击重试"
-            }
-        }
-
-        webView.webChromeClient = android.webkit.WebChromeClient()
-        webView.loadUrl(url)
-    }
-
-    /**
      * 关闭嵌入式导航，回到占位页
      */
     private fun closeEmbeddedNav() {
-        val webView = findViewById<android.webkit.WebView>(R.id.nav_webview)
-        webView?.apply {
-            stopLoading()
-            loadUrl("about:blank")
-        }
+        // 清理 ActivityView
+        activityViewInstance = null
+        val container = findViewById<FrameLayout>(R.id.nav_activity_container)
+        container?.removeAllViews()
+        
         findViewById<View>(R.id.nav_sdk_container)?.visibility = View.GONE
         findViewById<View>(R.id.nav_placeholder)?.visibility = View.VISIBLE
         embeddedNavType = null
