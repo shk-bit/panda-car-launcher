@@ -107,6 +107,12 @@ class MainActivity : AppCompatActivity() {
         applyWallpaper()
     }
 
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // 横竖屏切换时重新加载布局
+        recreate()
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) setupFullScreen()

@@ -207,8 +207,15 @@ class AppManagerActivity : AppCompatActivity() {
         // 设置应用名称
         dialog.findViewById<TextView>(R.id.tv_app_name)?.text = app.appName
 
-        // 设置包名
-        dialog.findViewById<TextView>(R.id.tv_package_name)?.text = "包名: ${app.packageName}"
+        // 设置包名 - 点击复制
+        val tvPackageName = dialog.findViewById<TextView>(R.id.tv_package_name)
+        tvPackageName?.text = "包名: ${app.packageName}"
+        tvPackageName?.setOnClickListener {
+            val clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("包名", app.packageName)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, "已复制包名: ${app.packageName}", Toast.LENGTH_SHORT).show()
+        }
 
         // 获取应用详细信息
         try {

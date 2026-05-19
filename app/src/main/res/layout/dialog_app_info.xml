@@ -43,7 +43,7 @@
         android:textSize="@dimen/text_size_large"
         android:textStyle="bold" />
 
-    <!-- 包名 -->
+    <!-- 包名（点击复制） -->
     <TextView
         android:id="@+id/tv_package_name"
         android:layout_width="wrap_content"
@@ -51,8 +51,13 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="4dp"
         android:text="包名: com.example.app"
-        android:textColor="@color/text_hint"
-        android:textSize="@dimen/text_size_small" />
+        android:textColor="@color/primary"
+        android:textSize="@dimen/text_size_small"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
 
     <!-- 版本信息 -->
     <TextView
