@@ -1184,9 +1184,9 @@ class MainActivity : AppCompatActivity() {
 
         // 切换显示
         findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
-        findViewById<View>(R.id.nav_webview_container)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
         findViewById<View>(R.id.nav_loading)?.visibility = View.VISIBLE
-        findViewById<TextView>(R.id.nav_webview_title)?.text = name
+        findViewById<TextView>(R.id.nav_sdk_title)?.text = name
         findViewById<TextView>(R.id.nav_loading_text)?.text = "正在加载${name}..."
 
         // 配置 WebView
@@ -1227,7 +1227,7 @@ class MainActivity : AppCompatActivity() {
             stopLoading()
             loadUrl("about:blank")
         }
-        findViewById<View>(R.id.nav_webview_container)?.visibility = View.GONE
+        findViewById<View>(R.id.nav_sdk_container)?.visibility = View.GONE
         findViewById<View>(R.id.nav_placeholder)?.visibility = View.VISIBLE
         embeddedNavType = null
         embeddedNavPkg = null
