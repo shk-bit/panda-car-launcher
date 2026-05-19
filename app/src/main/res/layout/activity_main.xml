@@ -33,7 +33,7 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- 上半部分：导航卡片 - 嵌入式导航容器 -->
+            <!-- 上半部分：导航卡片 - SDK导航控件容器 -->
             <FrameLayout
                 android:id="@+id/nav_card"
                 android:layout_width="match_parent"
@@ -111,16 +111,16 @@
 
                 </LinearLayout>
 
-                <!-- 嵌入式导航 WebView（启动后显示） -->
+                <!-- SDK导航控件容器（启动后显示） -->
                 <FrameLayout
-                    android:id="@+id/nav_webview_container"
+                    android:id="@+id/nav_sdk_container"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:visibility="gone">
 
                     <!-- 导航标题栏 -->
                     <LinearLayout
-                        android:id="@+id/nav_webview_toolbar"
+                        android:id="@+id/nav_sdk_toolbar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -138,7 +138,7 @@
                             android:tint="#00CED1" />
 
                         <TextView
-                            android:id="@+id/nav_webview_title"
+                            android:id="@+id/nav_sdk_title"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -168,12 +168,20 @@
 
                     </LinearLayout>
 
-                    <!-- WebView -->
-                    <WebView
-                        android:id="@+id/nav_webview"
+                    <!-- SDK导航控件占位 -->
+                    <FrameLayout
+                        android:id="@+id/nav_plugin_container"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="44dp" />
+                        android:layout_marginTop="44dp">
+
+                        <!-- 默认WebView占位 -->
+                        <WebView
+                            android:id="@+id/nav_webview"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                    </FrameLayout>
 
                     <!-- 加载中 -->
                     <LinearLayout
@@ -182,7 +190,8 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:background="#E6101020">
+                        android:background="#E6101020"
+                        android:visibility="gone">
 
                         <ProgressBar
                             android:layout_width="40dp"
@@ -213,51 +222,108 @@
                 android:background="@drawable/bg_plugin_card"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp">
+                android:padding="12dp">
 
-                <ImageView
-                    android:id="@+id/music_album"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@drawable/ic_music"
-                    android:background="@drawable/bg_icon_cyan"
-                    android:padding="12dp" />
-
+                <!-- 左侧：音乐信息 -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="16dp"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/music_title"
-                        android:layout_width="wrap_content"
+                    <!-- 音乐标题栏 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="未在播放"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:maxLines="1"
-                        android:ellipsize="end" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/music_artist"
-                        android:layout_width="wrap_content"
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_music"
+                            android:tint="#FF6B6B" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="音乐"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <!-- 音乐插件选择按钮 -->
+                        <TextView
+                            android:id="@+id/music_plugin_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="选择 ▼"
+                            android:textColor="#FF6B6B"
+                            android:textSize="11sp"
+                            android:padding="4dp"
+                            android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+                    </LinearLayout>
+
+                    <!-- 音乐信息 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text=""
-                        android:textColor="#80FFFFFF"
-                        android:textSize="13sp"
-                        android:maxLines="1"
-                        android:ellipsize="end" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="8dp">
+
+                        <ImageView
+                            android:id="@+id/music_album"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_music"
+                            android:background="@drawable/bg_icon_cyan"
+                            android:padding="10dp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/music_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="未在播放"
+                                android:textColor="#FFFFFF"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                android:ellipsize="end" />
+
+                            <TextView
+                                android:id="@+id/music_artist"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text=""
+                                android:textColor="#80FFFFFF"
+                                android:textSize="12sp"
+                                android:maxLines="1"
+                                android:ellipsize="end" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
+                <!-- 右侧：控制按钮 -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:id="@+id/music_prev"
@@ -271,8 +337,8 @@
                         android:id="@+id/music_play"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_play"
                         android:background="@drawable/bg_icon_cyan"
                         android:padding="12dp" />

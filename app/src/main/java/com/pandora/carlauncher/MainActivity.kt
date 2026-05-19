@@ -302,11 +302,11 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.nav_switch)?.setOnClickListener {
             showNavSwitchDialog()
         }
-        // 导航切换（WebView 工具栏上的）
+        // 导航切换（SDK 工具栏上的）
         findViewById<TextView>(R.id.nav_switch2)?.setOnClickListener {
             showNavSwitchDialog()
         }
-        // 关闭导航 WebView
+        // 关闭导航 SDK
         findViewById<ImageView>(R.id.nav_close)?.setOnClickListener {
             closeEmbeddedNav()
         }
@@ -323,6 +323,10 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<ImageView>(R.id.music_next)?.setOnClickListener {
             sendMediaAction("next")
+        }
+        // 音乐插件选择按钮
+        findViewById<TextView>(R.id.music_plugin_switch)?.setOnClickListener {
+            showMusicPluginSwitchDialog()
         }
     }
 
@@ -378,6 +382,32 @@ class MainActivity : AppCompatActivity() {
                         loadEmbeddedNavWeb(currentNavType!!, "$navName(在线)", url)
                     }
                 }
+                dialog.dismiss()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    /**
+     * 显示音乐插件选择对话框
+     */
+    private fun showMusicPluginSwitchDialog() {
+        val musicApps = getInstalledMusicAppsList()
+        if (musicApps.isEmpty()) {
+            Toast.makeText(this, "未安装音乐应用", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val items = musicApps.map { it.appName }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("选择音乐应用")
+            .setItems(items) { dialog, which ->
+                val selectedApp = musicApps[which]
+                // 启动选中的音乐应用
+                openApp(selectedApp.packageName, selectedApp.appName)
+                // 更新显示
+                findViewById<TextView>(R.id.music_plugin_switch)?.text = "${selectedApp.appName.take(4)} ▼"
                 dialog.dismiss()
             }
             .setNegativeButton("取消", null)
