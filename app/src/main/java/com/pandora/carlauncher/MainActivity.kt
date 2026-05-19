@@ -1167,16 +1167,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 启动嵌入式导航
-     * 优先检测本地安装的地图App，嵌入其 WebView 页面
+     * 启动嵌入式导航（画中画模式）
+     * 直接启动地图APP，由地图APP负责定位/语音/离线/车道级导航
      */
     private fun launchEmbeddedNav() {
         // 1. 查找已安装的地图应用
         val installed = findInstalledMapBinding()
         if (installed.isEmpty()) {
-            Toast.makeText(this, "未检测到地图应用，使用在线导航", Toast.LENGTH_SHORT).show()
-            // 没有安装任何地图，使用默认高德在线版
-            loadEmbeddedNavWeb("amap", "高德地图(在线)", "https://m.amap.com/navi/")
+            Toast.makeText(this, "未检测到地图应用", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -1187,7 +1185,33 @@ class MainActivity : AppCompatActivity() {
             installed.first()
         }
 
-        loadEmbeddedNavWeb(target.type, target.name, target.webUrl)
+        // 3. 直接启动地图APP（画中画模式）
+        launchMapAppPip(target.packageName, target.name)
+    }
+
+    /**
+     * 启动地图APP（画中画模式）
+     * 定位/语音/离线/车道级 全部由地图官方APP实现
+     */
+    private fun launchMapAppPip(packageName: String, name: String) {
+        try {
+            val intent = packageManager.getLaunchIntentForPackage(packageName)
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                // 尝试传递画中画/迷你模式参数（部分地图支持）
+                intent.putExtra("pip_mode", true)
+                intent.putExtra("mini_mode", true)
+                startActivity(intent)
+                
+                // 更新状态显示
+                findViewById<TextView>(R.id.nav_status)?.text = "已启动: $name"
+                Toast.makeText(this, "已启动$name", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "无法启动$name", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "启动失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**

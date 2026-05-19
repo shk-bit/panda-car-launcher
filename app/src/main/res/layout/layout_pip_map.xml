@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 画中画地图布局 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pip_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_plugin_card">
+
+    <!-- 地图容器（预留，实际地图APP在独立窗口运行） -->
+    <FrameLayout
+        android:id="@+id/pip_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="40dp">
+
+        <!-- 提示信息 -->
+        <LinearLayout
+            android:id="@+id/pip_error"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_navigation"
+                android:tint="#4000CED1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="未安装地图应用"
+                android:textColor="#B0FFFFFF"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- 顶部控制栏（可拖动） -->
+    <LinearLayout
+        android:id="@+id/pip_drag_handle"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#CC000000"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp">
+
+        <!-- 地图图标 -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_navigation"
+            android:tint="#00CED1" />
+
+        <!-- 地图名称 -->
+        <TextView
+            android:id="@+id/pip_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="高德地图"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- 切换地图 -->
+        <TextView
+            android:id="@+id/pip_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="切换"
+            android:textColor="#00CED1"
+            android:textSize="12sp"
+            android:padding="6dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+        <!-- 全屏 -->
+        <ImageView
+            android:id="@+id/pip_fullscreen"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_fullscreen"
+            android:padding="6dp"
+            android:tint="#FFFFFF"
+            android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+        <!-- 关闭 -->
+        <ImageView
+            android:id="@+id/pip_close"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_close"
+            android:padding="6dp"
+            android:tint="#FFFFFF"
+            android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+    </LinearLayout>
+
+</FrameLayout>

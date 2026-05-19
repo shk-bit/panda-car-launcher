@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -13,12 +14,16 @@ import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import android.view.*
-import android.webkit.*
 import android.widget.*
 
 /**
- * 悬浮地图服务 - 新版设计
- * 参考：分层悬浮架构，地图居中，信息卡片叠加
+ * 画中画地图服务
+ * 
+ * 方案：原生悬浮窗 + 专用地图 APP
+ * - 定位/语音/离线/车道级 全部由地图官方APP实现
+ * - 本服务只做「容器 + 控制」
+ * 
+ * 参考：布丁UI、氢桌面的画中画地图实现
  */
 class FloatingMapService : Service() {
 
@@ -30,33 +35,40 @@ class FloatingMapService : Service() {
         const val EXTRA_MAP_PACKAGE = "extra_map_package"
         const val EXTRA_MAP_NAME = "extra_map_name"
 
-        private const val DEFAULT_WIDTH = 800
-        private const val DEFAULT_HEIGHT = 500
-        private const val MIN_WIDTH = 400
-        private const val MIN_HEIGHT = 250
-        private const val MAX_WIDTH = 1920
-        private const val MAX_HEIGHT = 1200
+        // 地图APP包名映射
+        val MAP_PACKAGES = mapOf(
+            "amap" to listOf(
+                "com.autonavi.amapauto",      // 高德车机版
+                "com.autonavi.amapauto.chenmo", // 高德车机共存版
+                "com.autonavi.minimap"        // 高德手机版
+            ),
+            "baidu" to listOf(
+                "com.baidu.naviauto",         // 百度车机版
+                "com.baidu.BaiduMap"          // 百度手机版
+            ),
+            "tencent" to listOf(
+                "com.tencent.map"             // 腾讯地图
+            )
+        )
+
+        // 地图APP主Activity映射
+        val MAP_ACTIVITIES = mapOf(
+            "com.autonavi.amapauto" to "com.autonavi.map.activity.SplashActivity",
+            "com.autonavi.minimap" to "com.autonavi.map.activity.SplashActivity",
+            "com.baidu.naviauto" to "com.baidu.navi.NaviActivity",
+            "com.baidu.BaiduMap" to "com.baidu.mapapi.map.MapActivity",
+            "com.tencent.map" to "com.tencent.map.MainActivity"
+        )
     }
 
     private var windowManager: WindowManager? = null
     private var floatingView: View? = null
-    private var webView: WebView? = null
     private var params: WindowManager.LayoutParams? = null
-    private var loadingContainer: View? = null
-    private var tvStatus: TextView? = null
-    private var navCard: View? = null
-
-    private var currentWidth = DEFAULT_WIDTH
-    private var currentHeight = DEFAULT_HEIGHT
-    private var mapPackage: String? = null
+    private var activityViewContainer: FrameLayout? = null
+    
+    private var currentMapType = "amap"
+    private var currentMapPackage: String? = null
     private var mapName: String? = null
-    private var currentMapType = "amap" // amap, baidu, tencent
-
-    // 拖动
-    private var initialX = 0
-    private var initialY = 0
-    private var initialTouchX = 0f
-    private var initialTouchY = 0f
 
     override fun onCreate() {
         super.onCreate()
@@ -68,7 +80,7 @@ class FloatingMapService : Service() {
         Log.d(TAG, "onStartCommand")
         
         intent?.let {
-            mapPackage = it.getStringExtra(EXTRA_MAP_PACKAGE)
+            currentMapPackage = it.getStringExtra(EXTRA_MAP_PACKAGE)
             mapName = it.getStringExtra(EXTRA_MAP_NAME) ?: "导航"
         }
 
@@ -81,11 +93,12 @@ class FloatingMapService : Service() {
         return START_STICKY
     }
 
-    @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility", "InflateParams")
+    @SuppressLint("ClickableViewAccessibility", "InflateParams")
     private fun createFloatingWindow() {
-        Log.d(TAG, "createFloatingWindow")
+        Log.d(TAG, "创建画中画地图窗口")
+        
         val inflater = LayoutInflater.from(this)
-        floatingView = inflater.inflate(R.layout.layout_floating_map, null)
+        floatingView = inflater.inflate(R.layout.layout_pip_map, null)
 
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -94,93 +107,127 @@ class FloatingMapService : Service() {
             WindowManager.LayoutParams.TYPE_PHONE
         }
 
-        // 居中显示
+        // 默认大小（导航区域大小）
         val dm = resources.displayMetrics
-        val x = (dm.widthPixels - currentWidth) / 2
-        val y = (dm.heightPixels - currentHeight) / 2
+        val width = (dm.widthPixels * 0.6).toInt()
+        val height = (dm.heightPixels * 0.5).toInt()
 
         params = WindowManager.LayoutParams(
-            currentWidth,
-            currentHeight,
+            width, height,
             type,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            this.x = x
-            this.y = y
+            x = (dm.widthPixels - width) / 2
+            y = (dm.heightPixels - height) / 3
         }
 
         try {
             windowManager?.addView(floatingView, params)
-            Log.d(TAG, "悬浮窗已添加 ${currentWidth}x${currentHeight}")
+            Log.d(TAG, "悬浮窗已添加 ${width}x${height}")
         } catch (e: Exception) {
             Log.e(TAG, "创建悬浮窗失败", e)
             stopSelf()
             return
         }
 
-        val rootView = floatingView ?: return
-        webView = rootView.findViewById(R.id.map_webview)
-        loadingContainer = rootView.findViewById(R.id.loading_container)
-        tvStatus = rootView.findViewById(R.id.tv_status)
-        navCard = rootView.findViewById(R.id.map_nav_card)
-
-        setupWebView()
-        setupButtons(rootView)
+        activityViewContainer = floatingView?.findViewById(R.id.pip_container)
+        setupButtons(floatingView!!)
         setupDrag()
+        
+        // 启动地图APP
+        launchMapApp()
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView() {
-        val wv = webView ?: return
-        wv.settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            loadWithOverviewMode = true
-            useWideViewPort = true
-            setSupportZoom(true)
-            builtInZoomControls = false
-            cacheMode = WebSettings.LOAD_DEFAULT
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            allowContentAccess = true
-            allowFileAccess = true
-            // 自适应屏幕
-            layoutAlgorithm = WebSettings.LayoutAlgorithm.SINGLE_COLUMN
+    /**
+     * 启动地图APP
+     * 方案1：直接启动地图APP（画中画模式）
+     * 方案2：使用ActivityView嵌入（需要Android 11+）
+     */
+    private fun launchMapApp() {
+        // 查找已安装的地图APP
+        val pkg = findInstalledMapPackage()
+        if (pkg == null) {
+            showError("未安装地图应用")
+            return
         }
 
-        wv.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                Log.d(TAG, "页面加载完成: $url")
-                loadingContainer?.visibility = View.GONE
-            }
-            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-                Log.e(TAG, "页面加载错误: $error")
-                tvStatus?.text = "加载失败"
-            }
-        }
+        currentMapPackage = pkg
+        Log.d(TAG, "启动地图: $pkg")
 
-        wv.webChromeClient = WebChromeClient()
-        loadMapUrl(currentMapType)
+        try {
+            // 方案：启动地图APP到画中画模式
+            val intent = packageManager.getLaunchIntentForPackage(pkg)
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                // 尝试传递画中画参数（部分地图支持）
+                intent.putExtra("pip_mode", true)
+                intent.putExtra("mini_mode", true)
+                startActivity(intent)
+                
+                updateStatus(getMapDisplayName(pkg))
+            } else {
+                showError("无法启动地图")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "启动地图失败", e)
+            showError("启动失败: ${e.message}")
+        }
     }
 
-    private fun loadMapUrl(type: String) {
-        val wv = webView ?: return
-        val url = when (type) {
-            "baidu" -> "https://map.baidu.com/mobile/webapp/index/index"
-            "tencent" -> "https://map.qq.com/m/"
-            else -> "https://m.amap.com/navi/"
+    /**
+     * 查找已安装的地图APP包名
+     */
+    private fun findInstalledMapPackage(): String? {
+        val packages = MAP_PACKAGES[currentMapType] ?: return null
+        for (pkg in packages) {
+            try {
+                packageManager.getPackageInfo(pkg, 0)
+                return pkg
+            } catch (_: Exception) {}
         }
-        Log.d(TAG, "加载地图: $url")
-        wv.loadUrl(url)
-        loadingContainer?.visibility = View.VISIBLE
-        tvStatus?.text = "正在加载${when(type) {"baidu"->"百度" "tencent"->"腾讯" else->"高德"}}地图..."
+        // 尝试其他类型
+        for ((_, pkgs) in MAP_PACKAGES) {
+            for (pkg in pkgs) {
+                try {
+                    packageManager.getPackageInfo(pkg, 0)
+                    return pkg
+                } catch (_: Exception) {}
+            }
+        }
+        return null
+    }
+
+    private fun getMapDisplayName(pkg: String): String {
+        return when {
+            pkg.contains("autonavi") -> "高德地图"
+            pkg.contains("baidu") -> "百度地图"
+            pkg.contains("tencent") -> "腾讯地图"
+            else -> "导航"
+        }
+    }
+
+    private fun updateStatus(status: String) {
+        floatingView?.findViewById<TextView>(R.id.pip_status)?.text = status
+    }
+
+    private fun showError(msg: String) {
+        floatingView?.findViewById<TextView>(R.id.pip_status)?.text = msg
+        floatingView?.findViewById<View>(R.id.pip_error)?.visibility = View.VISIBLE
     }
 
     private fun setupDrag() {
-        // 拖动导航卡片移动整个窗口
-        navCard?.setOnTouchListener(object : View.OnTouchListener {
+        val dragHandle = floatingView?.findViewById<View>(R.id.pip_drag_handle)
+        dragHandle?.setOnTouchListener(object : View.OnTouchListener {
+            private var initialX = 0
+            private var initialY = 0
+            private var initialTouchX = 0f
+            private var initialTouchY = 0f
+
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
@@ -191,14 +238,11 @@ class FloatingMapService : Service() {
                         return true
                     }
                     MotionEvent.ACTION_MOVE -> {
-                        val dx = event.rawX - initialTouchX
-                        val dy = event.rawY - initialTouchY
-                        params?.x = initialX + dx.toInt()
-                        params?.y = initialY + dy.toInt()
+                        params?.x = initialX + (event.rawX - initialTouchX).toInt()
+                        params?.y = initialY + (event.rawY - initialTouchY).toInt()
                         try { windowManager?.updateViewLayout(floatingView, params) } catch (_: Exception) {}
                         return true
                     }
-                    MotionEvent.ACTION_UP -> return true
                 }
                 return false
             }
@@ -207,66 +251,36 @@ class FloatingMapService : Service() {
 
     private fun setupButtons(rootView: View) {
         // 关闭
-        rootView.findViewById<ImageView>(R.id.btn_close)?.setOnClickListener {
+        rootView.findViewById<ImageView>(R.id.pip_close)?.setOnClickListener {
             stopSelf()
         }
 
-        // 缩放
-        rootView.findViewById<ImageView>(R.id.btn_zoom_in)?.setOnClickListener {
-            resizeWindow(1.2f)
-        }
-        rootView.findViewById<ImageView>(R.id.btn_zoom_out)?.setOnClickListener {
-            resizeWindow(0.8f)
+        // 切换地图
+        rootView.findViewById<TextView>(R.id.pip_switch)?.setOnClickListener {
+            showMapSwitchDialog()
         }
 
-        // 刷新
-        rootView.findViewById<ImageView>(R.id.btn_refresh)?.setOnClickListener {
-            webView?.reload()
-        }
-
-        // 地图类型切换
-        rootView.findViewById<LinearLayout>(R.id.map_type_container)?.setOnClickListener {
-            switchMapType("amap")
-        }
-        rootView.findViewById<LinearLayout>(R.id.map_type_baidu)?.setOnClickListener {
-            switchMapType("baidu")
-        }
-        rootView.findViewById<LinearLayout>(R.id.map_type_tencent)?.setOnClickListener {
-            switchMapType("tencent")
+        // 全屏（启动地图APP）
+        rootView.findViewById<ImageView>(R.id.pip_fullscreen)?.setOnClickListener {
+            currentMapPackage?.let { pkg ->
+                val intent = packageManager.getLaunchIntentForPackage(pkg)
+                intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            }
         }
     }
 
-    private fun switchMapType(type: String) {
-        if (currentMapType == type) return
-        currentMapType = type
-        loadMapUrl(type)
-        
-        // 更新按钮样式
-        val rootView = floatingView ?: return
-        rootView.findViewById<ImageView>(R.id.btn_map_amap)?.setBackgroundResource(
-            if (type == "amap") R.drawable.bg_map_btn_selected else R.drawable.bg_map_btn
-        )
-        rootView.findViewById<ImageView>(R.id.btn_map_baidu)?.setBackgroundResource(
-            if (type == "baidu") R.drawable.bg_map_btn_selected else R.drawable.bg_map_btn
-        )
-        rootView.findViewById<ImageView>(R.id.btn_map_tencent)?.setBackgroundResource(
-            if (type == "tencent") R.drawable.bg_map_btn_selected else R.drawable.bg_map_btn
-        )
-    }
-
-    private fun resizeWindow(scale: Float) {
-        val newWidth = (currentWidth * scale).toInt().coerceIn(MIN_WIDTH, MAX_WIDTH)
-        val newHeight = (currentHeight * scale).toInt().coerceIn(MIN_HEIGHT, MAX_HEIGHT)
-        currentWidth = newWidth
-        currentHeight = newHeight
-        params?.width = newWidth
-        params?.height = newHeight
-        try { windowManager?.updateViewLayout(floatingView, params) } catch (_: Exception) {}
+    private fun showMapSwitchDialog() {
+        // 这里可以弹出选择对话框，简化处理直接切换
+        val types = listOf("amap", "baidu", "tencent")
+        val idx = types.indexOf(currentMapType)
+        currentMapType = types[(idx + 1) % types.size]
+        launchMapApp()
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CHANNEL_ID, "悬浮地图", NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(CHANNEL_ID, "画中画地图", NotificationManager.IMPORTANCE_LOW)
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }
@@ -274,13 +288,13 @@ class FloatingMapService : Service() {
     private fun buildNotification(): Notification {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle("悬浮地图")
+                .setContentTitle("画中画地图")
                 .setSmallIcon(R.drawable.ic_navigation)
                 .build()
         } else {
             @Suppress("DEPRECATION")
             Notification.Builder(this)
-                .setContentTitle("悬浮地图")
+                .setContentTitle("画中画地图")
                 .setSmallIcon(R.drawable.ic_navigation)
                 .build()
         }
@@ -288,11 +302,6 @@ class FloatingMapService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        webView?.apply {
-            stopLoading()
-            loadUrl("about:blank")
-            destroy()
-        }
         floatingView?.let {
             try { windowManager?.removeView(it) } catch (_: Exception) {}
         }
