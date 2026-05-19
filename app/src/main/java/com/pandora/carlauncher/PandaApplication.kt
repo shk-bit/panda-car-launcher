@@ -1,9 +1,7 @@
 package com.pandora.carlauncher
 
 import android.app.Application
-import androidx.multidex.MultiDexApplication
 import me.jessyan.autosize.AutoSizeConfig
-import me.jessyan.autosize.unit.Subunits
 
 class PandaApplication : Application() {
     override fun onCreate() {
@@ -14,6 +12,5 @@ class PandaApplication : Application() {
         AutoSizeConfig.getInstance()
             .setUseDeviceSize(false)
             .setExcludeFontScale(true)
-            .setPrivateMode(false)
     }
 }

@@ -1055,7 +1055,7 @@ class MainActivity : AppCompatActivity() {
         val type: String,        // amap, baidu, tencent, sogou
         val name: String,        // 显示名称
         val packageName: String, // 包名
-        val webUrl: String       // WebView 内嵌 URL
+        val webUrl: String,       // WebView 内嵌 URL
         val className: String? = null  // 可选：直接启动的 Activity
     )
 
