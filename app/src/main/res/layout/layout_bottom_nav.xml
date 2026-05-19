@@ -8,33 +8,6 @@
     android:paddingStart="8dp"
     android:paddingEnd="8dp">
 
-    <!-- 音量 -->
-    <LinearLayout
-        android:id="@+id/nav_volume"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_volume"
-            android:tint="@color/text_secondary" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="音量"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/text_size_micro" />
-
-    </LinearLayout>
-
     <!-- 主页 -->
     <LinearLayout
         android:id="@+id/nav_home"
