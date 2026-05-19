@@ -298,13 +298,21 @@ class MainActivity : AppCompatActivity() {
      * 设置导航和音乐按钮点击事件
      */
     private fun setupNavButtons() {
-        // 导航切换
+        // 导航切换（占位页上的）
         findViewById<TextView>(R.id.nav_switch)?.setOnClickListener {
             showNavSwitchDialog()
         }
-        // 打开导航 - 点击导航卡片
-        findViewById<LinearLayout>(R.id.nav_card)?.setOnClickListener {
-            openMapApp()
+        // 导航切换（WebView 工具栏上的）
+        findViewById<TextView>(R.id.nav_switch2)?.setOnClickListener {
+            showNavSwitchDialog()
+        }
+        // 关闭导航 WebView
+        findViewById<ImageView>(R.id.nav_close)?.setOnClickListener {
+            closeEmbeddedNav()
+        }
+        // 点击导航卡片/占位页 -> 启动嵌入式导航
+        findViewById<View>(R.id.nav_placeholder)?.setOnClickListener {
+            launchEmbeddedNav()
         }
         // 音乐控制
         findViewById<ImageView>(R.id.music_prev)?.setOnClickListener {
@@ -322,27 +330,54 @@ class MainActivity : AppCompatActivity() {
      * 显示导航切换对话框
      */
     private fun showNavSwitchDialog() {
-        val items = arrayOf("高德地图", "百度地图", "腾讯地图")
-        val currentIndex = when (currentNavType) {
-            "baidu" -> 1
-            "tencent" -> 2
-            else -> 0
+        // 动态获取已安装的地图
+        val installed = findInstalledMapBinding()
+        val items = if (installed.isEmpty()) {
+            arrayOf("高德地图(在线)", "百度地图(在线)", "腾讯地图(在线)")
+        } else {
+            installed.map { it.name }.toTypedArray()
         }
+
+        val currentIndex = installed.indexOfFirst {
+            it.type == currentNavType
+        }.coerceAtLeast(0)
+
         AlertDialog.Builder(this)
             .setTitle("选择导航")
             .setSingleChoiceItems(items, currentIndex) { dialog, which ->
-                currentNavType = when (which) {
-                    1 -> "baidu"
-                    2 -> "tencent"
-                    else -> "amap"
+                if (installed.isNotEmpty() && which < installed.size) {
+                    val binding = installed[which]
+                    currentNavType = binding.type
+                    val navName = binding.name
+                    findViewById<TextView>(R.id.nav_switch)?.text = "$navName ▼"
+
+                    // 如果导航已打开，切换到新地图
+                    if (embeddedNavType != null) {
+                        loadEmbeddedNavWeb(binding.type, binding.name, binding.webUrl)
+                    }
+                } else {
+                    // 在线版
+                    currentNavType = when (which) {
+                        1 -> "baidu"
+                        2 -> "tencent"
+                        else -> "amap"
+                    }
+                    val navName = when (currentNavType) {
+                        "baidu" -> "百度"
+                        "tencent" -> "腾讯"
+                        else -> "高德"
+                    }
+                    findViewById<TextView>(R.id.nav_switch)?.text = "$navName ▼"
+
+                    if (embeddedNavType != null) {
+                        val url = when (currentNavType) {
+                            "baidu" -> "https://map.baidu.com/mobile/webapp/index/index"
+                            "tencent" -> "https://map.qq.com/m/"
+                            else -> "https://m.amap.com/navi/"
+                        }
+                        loadEmbeddedNavWeb(currentNavType!!, "$navName(在线)", url)
+                    }
                 }
-                val navName = when (currentNavType) {
-                    "baidu" -> "百度"
-                    "tencent" -> "腾讯"
-                    else -> "高德"
-                }
-                findViewById<TextView>(R.id.nav_switch)?.text = "$navName ▼"
-                findViewById<TextView>(R.id.nav_status)?.text = "${navName}导航运行中"
                 dialog.dismiss()
             }
             .setNegativeButton("取消", null)
@@ -1011,39 +1046,161 @@ class MainActivity : AppCompatActivity() {
         musicRefreshHandler.removeCallbacks(musicRefreshRunnable)
     }
 
+    // ========== 嵌入式导航 ==========
+
     /**
-     * 打开导航
+     * 主流车机地图绑定信息
+     */
+    data class MapBinding(
+        val type: String,        // amap, baidu, tencent, sogou
+        val name: String,        // 显示名称
+        val packageName: String, // 包名
+        val webUrl: String       // WebView 内嵌 URL
+        val className: String? = null  // 可选：直接启动的 Activity
+    )
+
+    /**
+     * 主流车机地图绑定列表
+     */
+    private val mapBindings: List<MapBinding> = listOf(
+        // 高德地图
+        MapBinding("amap", "高德地图车机版", "com.autonavi.amapauto",
+            "https://m.amap.com/navi/", "com.autonavi.map.activity.SplashActivity"),
+        MapBinding("amap", "高德地图", "com.autonavi.minimap",
+            "https://m.amap.com/navi/"),
+        MapBinding("amap", "高德地图车机共存版", "com.autonavi.amapauto.chenmo",
+            "https://m.amap.com/navi/"),
+        MapBinding("amap", "高德地图U3D版", "com.autonavi.amapauto.u3d",
+            "https://m.amap.com/navi/"),
+        // 百度地图
+        MapBinding("baidu", "百度地图车机版", "com.baidu.naviauto",
+            "https://map.baidu.com/mobile/webapp/index/index"),
+        MapBinding("baidu", "百度地图", "com.baidu.BaiduMap",
+            "https://map.baidu.com/mobile/webapp/index/index"),
+        MapBinding("baidu", "百度CarLife", "com.baidu.carlife",
+            "https://map.baidu.com/mobile/webapp/index/index"),
+        // 腾讯地图
+        MapBinding("tencent", "腾讯地图", "com.tencent.map",
+            "https://map.qq.com/m/"),
+        // 搜狗地图
+        MapBinding("sogou", "搜狗地图", "com.sogou.map.android",
+            "https://map.sogou.com/"),
+        // 美团
+        MapBinding("meituan", "美团", "com.sankuai.meituan",
+            "https://i.meituan.com/"),
+        // Google Maps
+        MapBinding("google", "Google Maps", "com.google.android.apps.maps",
+            "https://www.google.com/maps")
+    )
+
+    /** 当前嵌入的地图类型 */
+    private var embeddedNavType: String? = null
+
+    /** 当前嵌入的地图包名 */
+    private var embeddedNavPkg: String? = null
+
+    /**
+     * 打开导航（底部导航栏按钮）- 嵌入式
      */
     private fun openNavigation() {
-        val packages = listOf(
-            // 高德
-            "com.autonavi.amapauto" to "高德地图车机版",
-            "com.autonavi.amapauto.chenmo" to "高德地图车机共存版",
-            "com.autonavi.amapauto.u3d" to "高德地图车机共存U3D版",
-            // 百度
-            "com.baidu.BaiduMap" to "百度地图",
-            "com.baidu.naviauto" to "百度地图车机版",
-            // 腾讯
-            "com.tencent.map" to "腾讯地图",
-            // 搜狗
-            "com.sogou.map.android" to "搜狗地图",
-            // 美团
-            "com.sankuai.meituan" to "美团"
-        )
+        launchEmbeddedNav()
+    }
 
-        for ((pkg, name) in packages) {
-            try {
-                val intent = packageManager.getLaunchIntentForPackage(pkg)
-                if (intent != null) {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    startActivity(intent)
-                    findViewById<TextView>(R.id.nav_status)?.text = "已启动: $name"
-                    return
-                }
-            } catch (_: Exception) {}
+    /**
+     * 启动嵌入式导航
+     * 优先检测本地安装的地图App，嵌入其 WebView 页面
+     */
+    private fun launchEmbeddedNav() {
+        // 1. 查找已安装的地图应用
+        val installed = findInstalledMapBinding()
+        if (installed.isEmpty()) {
+            Toast.makeText(this, "未检测到地图应用，使用在线导航", Toast.LENGTH_SHORT).show()
+            // 没有安装任何地图，使用默认高德在线版
+            loadEmbeddedNavWeb("amap", "高德地图(在线)", "https://m.amap.com/navi/")
+            return
         }
 
-        Toast.makeText(this, "请安装导航应用", Toast.LENGTH_SHORT).show()
+        // 2. 优先使用 currentNavType 对应的地图
+        val target = if (currentNavType != "amap") {
+            installed.find { it.type == currentNavType } ?: installed.first()
+        } else {
+            installed.first()
+        }
+
+        loadEmbeddedNavWeb(target.type, target.name, target.webUrl)
+    }
+
+    /**
+     * 查找已安装的地图绑定
+     */
+    private fun findInstalledMapBinding(): List<MapBinding> {
+        return mapBindings.filter { binding ->
+            try {
+                packageManager.getPackageInfo(binding.packageName, 0)
+                true
+            } catch (_: Exception) {
+                false
+            }
+        }
+    }
+
+    /**
+     * 加载嵌入式导航 WebView
+     */
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun loadEmbeddedNavWeb(type: String, name: String, url: String) {
+        embeddedNavType = type
+        embeddedNavPkg = mapBindings.find { it.type == type }?.packageName
+
+        // 切换显示
+        findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
+        findViewById<View>(R.id.nav_webview_container)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.nav_loading)?.visibility = View.VISIBLE
+        findViewById<TextView>(R.id.nav_webview_title)?.text = name
+        findViewById<TextView>(R.id.nav_loading_text)?.text = "正在加载${name}..."
+
+        // 配置 WebView
+        val webView = findViewById<android.webkit.WebView>(R.id.nav_webview) ?: return
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
+            setSupportZoom(true)
+            builtInZoomControls = false
+            cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+            mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            allowContentAccess = true
+            allowFileAccess = true
+            layoutAlgorithm = android.webkit.WebSettings.LayoutAlgorithm.SINGLE_COLUMN
+        }
+
+        webView.webViewClient = object : android.webkit.WebViewClient() {
+            override fun onPageFinished(view: android.webkit.WebView?, urlStr: String?) {
+                findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
+            }
+            override fun onReceivedError(view: android.webkit.WebView?, request: android.webkit.WebResourceRequest?, error: android.webkit.WebResourceError?) {
+                findViewById<TextView>(R.id.nav_loading_text)?.text = "加载失败，点击重试"
+            }
+        }
+
+        webView.webChromeClient = android.webkit.WebChromeClient()
+        webView.loadUrl(url)
+    }
+
+    /**
+     * 关闭嵌入式导航，回到占位页
+     */
+    private fun closeEmbeddedNav() {
+        val webView = findViewById<android.webkit.WebView>(R.id.nav_webview)
+        webView?.apply {
+            stopLoading()
+            loadUrl("about:blank")
+        }
+        findViewById<View>(R.id.nav_webview_container)?.visibility = View.GONE
+        findViewById<View>(R.id.nav_placeholder)?.visibility = View.VISIBLE
+        embeddedNavType = null
+        embeddedNavPkg = null
     }
 
     data class CustomApp(val packageName: String, val appName: String)

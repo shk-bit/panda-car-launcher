@@ -33,76 +33,176 @@
             android:orientation="horizontal"
             android:padding="16dp">
 
-            <!-- 左侧：导航区域（占2/3） -->
-            <LinearLayout
+            <!-- 左侧：导航区域（占2/3）- 嵌入式导航容器 -->
+            <FrameLayout
                 android:id="@+id/nav_card"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
                 android:layout_marginEnd="12dp"
-                android:background="@drawable/bg_plugin_card"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:background="@drawable/bg_plugin_card">
 
-                <!-- 导航标题 -->
+                <!-- 导航占位页（未启动时显示） -->
                 <LinearLayout
+                    android:id="@+id/nav_placeholder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_navigation"
-                        android:tint="#00CED1" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="12dp"
-                        android:text="导航"
-                        android:textColor="#FFFFFF"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/nav_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="高德 ▼"
-                        android:textColor="#00CED1"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-                <!-- 导航内容 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
+                    android:padding="20dp"
                     android:gravity="center">
 
-                    <ImageView
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:src="@drawable/ic_navigation"
-                        android:tint="#4000CED1" />
-
-                    <TextView
-                        android:id="@+id/nav_status"
-                        android:layout_width="wrap_content"
+                    <!-- 导航标题栏 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="点击启动导航"
-                        android:textColor="#B0FFFFFF"
-                        android:textSize="16sp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_navigation"
+                            android:tint="#00CED1" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:text="导航"
+                            android:textColor="#FFFFFF"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/nav_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="高德 ▼"
+                            android:textColor="#00CED1"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                    <!-- 导航占位内容 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:src="@drawable/ic_navigation"
+                            android:tint="#4000CED1" />
+
+                        <TextView
+                            android:id="@+id/nav_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="点击启动导航"
+                            android:textColor="#B0FFFFFF"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
+                <!-- 嵌入式导航 WebView（启动后显示） -->
+                <FrameLayout
+                    android:id="@+id/nav_webview_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                    <!-- 导航标题栏（覆盖在 WebView 上方） -->
+                    <LinearLayout
+                        android:id="@+id/nav_webview_toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="#CC000000"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_navigation"
+                            android:tint="#00CED1" />
+
+                        <TextView
+                            android:id="@+id/nav_webview_title"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="高德地图"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/nav_switch2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="切换"
+                            android:textColor="#00CED1"
+                            android:textSize="13sp"
+                            android:padding="4dp"
+                            android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+                        <ImageView
+                            android:id="@+id/nav_close"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@drawable/ic_close"
+                            android:padding="4dp"
+                            android:background="?android:attr/selectableItemBackgroundBorderless" />
+
+                    </LinearLayout>
+
+                    <!-- WebView 容器 -->
+                    <WebView
+                        android:id="@+id/nav_webview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="44dp" />
+
+                    <!-- 加载中提示 -->
+                    <LinearLayout
+                        android:id="@+id/nav_loading"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="#E6101020">
+
+                        <ProgressBar
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:indeterminateTint="#00CED1" />
+
+                        <TextView
+                            android:id="@+id/nav_loading_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="正在加载导航..."
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+            </FrameLayout>
 
             <!-- 右侧：音乐区域（占1/3） -->
             <LinearLayout
