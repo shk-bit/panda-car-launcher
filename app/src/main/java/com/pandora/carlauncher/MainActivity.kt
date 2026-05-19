@@ -290,8 +290,38 @@ class MainActivity : AppCompatActivity() {
             showAddAppDialog()
         }
 
+        // 动态调整底部导航栏图标大小（绕过AutoSize适配）
+        adjustBottomNavIconSize()
+
         // 设置可滑动的底部应用列表
         setupBottomAppsRecyclerView()
+    }
+
+    /**
+     * 调整底部导航栏图标大小
+     * 使用原始像素值绕过AutoSize适配，确保在不同屏幕上显示一致
+     */
+    private fun adjustBottomNavIconSize() {
+        // 获取屏幕密度
+        val density = resources.displayMetrics.density
+        // 固定图标大小为 28dp 对应的像素值（不经过AutoSize转换）
+        val iconSizePx = (28 * density).toInt()
+
+        // 主页图标
+        findViewById<LinearLayout>(R.id.nav_home)?.findViewById<ImageView>(android.R.id.content)?.let { }
+        // 直接通过遍历子View来设置图标大小
+        val navIds = listOf(R.id.nav_home, R.id.nav_navigation, R.id.nav_music, R.id.nav_add)
+        for (navId in navIds) {
+            findViewById<LinearLayout>(navId)?.let { navLayout ->
+                for (i in 0 until navLayout.childCount) {
+                    val child = navLayout.getChildAt(i)
+                    if (child is ImageView) {
+                        child.layoutParams.width = iconSizePx
+                        child.layoutParams.height = iconSizePx
+                    }
+                }
+            }
+        }
     }
 
     /**
