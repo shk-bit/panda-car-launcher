@@ -49,6 +49,7 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     // AndroidAutoSize 屏幕适配
     implementation 'com.github.JessYanCoding:AndroidAutoSize:v1.2.0'
-    // Android Car 库（系统级：CarActivityView 嵌入地图）
-    compileOnly 'android.car:car:1.0.0'
+    // 注意：android.car 库仅在系统编译环境(AOSP)中可用
+    // 普通Android Studio编译使用反射调用，不直接依赖
+    // compileOnly 'android.car:car:1.0.0' // 系统编译时取消注释
 }

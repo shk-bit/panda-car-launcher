@@ -22,7 +22,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.app.ActivityManager
-import android.car.app.CarActivityView
 import android.hardware.display.DisplayManager
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -1189,84 +1188,136 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 启动嵌入式导航（系统级方案）
-     * 使用 CarActivityView 嵌入地图APP到导航区域
+     * 使用反射创建 CarActivityView 嵌入地图APP到导航区域
      * 参考：AOSP CarLauncher
+     * 
+     * 需要：系统签名 + ACTIVITY_EMBEDDING 权限
+     * 降级：非系统环境自动回退到直接启动地图APP
      */
+    private var activityViewInstance: Any? = null
+
     private fun launchEmbeddedNav() {
-        val activityView = findViewById<CarActivityView>(R.id.nav_activity_view)
-        if (activityView != null) {
-            // 系统级方案：使用 CarActivityView 嵌入地图
-            startMapInActivityView(activityView)
-        } else {
-            // 降级方案：直接启动地图APP
-            val installed = findInstalledMapBinding()
-            if (installed.isNotEmpty()) {
-                val target = installed.first()
-                launchMapAppPip(target.packageName, target.name)
+        val container = findViewById<FrameLayout>(R.id.nav_activity_container)
+        if (container == null) {
+            // 容器不存在，降级
+            launchMapFallback()
+            return
+        }
+
+        try {
+            // 反射创建 CarActivityView
+            val activityView = createCarActivityView(container)
+            if (activityView != null) {
+                activityViewInstance = activityView
+                setupActivityViewCallback(activityView)
+                
+                // 切换显示
+                findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
+                findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
+                findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
+                
+                Log.d(TAG, "CarActivityView 创建成功，等待就绪")
             } else {
-                Toast.makeText(this, "未检测到地图应用", Toast.LENGTH_SHORT).show()
+                launchMapFallback()
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "创建 CarActivityView 失败，降级为直接启动", e)
+            launchMapFallback()
         }
     }
 
     /**
-     * 在 CarActivityView 中启动地图APP
-     * 需要：系统签名 + ACTIVITY_EMBEDDING 权限
+     * 反射创建 CarActivityView
+     * 类路径：android.car.app.CarActivityView
      */
-    private fun startMapInActivityView(activityView: CarActivityView) {
-        try {
-            // 隐藏占位页，显示SDK容器
-            findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
-            findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
-            findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
-
-            // 设置回调
-            activityView.setCallback(object : CarActivityView.StateCallback() {
-                override fun onActivityViewReady(view: CarActivityView?) {
-                    Log.d(TAG, "ActivityView ready, 启动地图")
-                    try {
-                        // 启动地图APP到 ActivityView 中
-                        val intent = Intent.makeMainSelectorActivity(
-                            Intent.ACTION_MAIN,
-                            Intent.CATEGORY_APP_MAPS
-                        )
-                        view?.startActivity(intent)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "启动地图失败，尝试直接启动", e)
-                        // 降级：直接启动已安装的地图APP
-                        val installed = findInstalledMapBinding()
-                        if (installed.isNotEmpty()) {
-                            launchMapAppPip(installed.first().packageName, installed.first().name)
-                        }
-                    }
-                }
-
-                override fun onActivityViewDestroyed(view: CarActivityView?) {
-                    Log.d(TAG, "ActivityView destroyed")
-                }
-
-                override fun onTaskMovedToFront(taskId: Int) {
-                    Log.d(TAG, "Task moved to front: $taskId")
-                    // 确保Launcher回到前台
-                    try {
-                        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                        am.moveTaskToFront(this@MainActivity.taskId, 0)
-                    } catch (e: Exception) {
-                        Log.w(TAG, "移动Launcher到前台失败", e)
-                    }
-                }
-            })
-
-            Log.d(TAG, "CarActivityView 已设置回调，等待就绪")
-        } catch (e: Exception) {
-            Log.e(TAG, "CarActivityView 不可用，降级为直接启动", e)
-            // 降级方案
-            val installed = findInstalledMapBinding()
-            if (installed.isNotEmpty()) {
-                launchMapAppPip(installed.first().packageName, installed.first().name)
-            } else {
-                Toast.makeText(this, "系统不支持嵌入模式，请安装地图应用", Toast.LENGTH_SHORT).show()
+    private fun createCarActivityView(container: FrameLayout): Any? {
+        return try {
+            val clazz = Class.forName("android.car.app.CarActivityView")
+            val constructor = clazz.getConstructor(android.content.Context::class.java)
+            val view = constructor.newInstance(this) as? View
+            if (view != null) {
+                container.removeAllViews()
+                container.addView(view, FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                ))
             }
+            view
+        } catch (e: Exception) {
+            Log.e(TAG, "反射创建 CarActivityView 失败", e)
+            null
+        }
+    }
+
+    /**
+     * 反射设置 CarActivityView 的 StateCallback
+     */
+    private fun setupActivityViewCallback(activityView: Any) {
+        try {
+            val clazz = activityView.javaClass
+            // 创建 StateCallback 的匿名实现
+            val callbackClass = Class.forName("android.car.app.CarActivityView\$StateCallback")
+            val callback = java.lang.reflect.Proxy.newProxyInstance(
+                callbackClass.classLoader,
+                arrayOf(callbackClass)
+            ) { _, method, args ->
+                when (method.name) {
+                    "onActivityViewReady" -> {
+                        Log.d(TAG, "ActivityView ready, 启动地图")
+                        try {
+                            val view = args?.get(0) as? View
+                            // 反射调用 startActivity
+                            val startMethod = clazz.getMethod(
+                                "startActivity",
+                                android.content.Intent::class.java
+                            )
+                            val intent = Intent.makeMainSelectorActivity(
+                                Intent.ACTION_MAIN,
+                                Intent.CATEGORY_APP_MAPS
+                            )
+                            startMethod.invoke(activityView, intent)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "启动地图失败", e)
+                            launchMapFallback()
+                        }
+                        null
+                    }
+                    "onActivityViewDestroyed" -> {
+                        Log.d(TAG, "ActivityView destroyed")
+                        null
+                    }
+                    "onTaskMovedToFront" -> {
+                        val taskId = args?.get(0) as? Int ?: 0
+                        Log.d(TAG, "Task moved to front: $taskId")
+                        try {
+                            val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                            am.moveTaskToFront(this@MainActivity.taskId, 0)
+                        } catch (e: Exception) {
+                            Log.w(TAG, "移动Launcher到前台失败", e)
+                        }
+                        null
+                    }
+                    else -> null
+                }
+            }
+            // 反射调用 setCallback
+            val setCallbackMethod = clazz.getMethod("setCallback", callbackClass)
+            setCallbackMethod.invoke(activityView, callback)
+        } catch (e: Exception) {
+            Log.e(TAG, "设置 ActivityView 回调失败", e)
+        }
+    }
+
+    /**
+     * 降级方案：直接启动地图APP
+     */
+    private fun launchMapFallback() {
+        val installed = findInstalledMapBinding()
+        if (installed.isNotEmpty()) {
+            val target = installed.first()
+            launchMapAppPip(target.packageName, target.name)
+        } else {
+            Toast.makeText(this, "未检测到地图应用", Toast.LENGTH_SHORT).show()
         }
     }
 

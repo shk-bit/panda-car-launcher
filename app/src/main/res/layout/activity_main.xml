@@ -169,9 +169,9 @@
 
                     </LinearLayout>
 
-                    <!-- SDK导航控件容器 -->
-                    <android.car.app.CarActivityView
-                        android:id="@+id/nav_activity_view"
+                    <!-- 地图嵌入容器（系统级时动态创建 CarActivityView） -->
+                    <FrameLayout
+                        android:id="@+id/nav_activity_container"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="44dp" />
