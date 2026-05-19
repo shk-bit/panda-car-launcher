@@ -11,8 +11,8 @@ android {
         applicationId "com.pandora.carlauncher"
         minSdk 26
         targetSdk 34
-        versionCode 67
-        versionName "4.8.5"
+        versionCode 68
+        versionName "4.9.0"
     }
 
     buildTypes {
@@ -49,4 +49,6 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     // AndroidAutoSize 屏幕适配
     implementation 'com.github.JessYanCoding:AndroidAutoSize:v1.2.0'
+    // Android Car 库（系统级：CarActivityView 嵌入地图）
+    compileOnly 'android.car:car:1.0.0'
 }

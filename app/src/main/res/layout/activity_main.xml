@@ -169,20 +169,12 @@
 
                     </LinearLayout>
 
-                    <!-- SDK导航控件占位 -->
-                    <FrameLayout
-                        android:id="@+id/nav_plugin_container"
+                    <!-- SDK导航控件容器 -->
+                    <android.car.app.CarActivityView
+                        android:id="@+id/nav_activity_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="44dp">
-
-                        <!-- 默认WebView占位 -->
-                        <WebView
-                            android:id="@+id/nav_webview"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
-
-                    </FrameLayout>
+                        android:layout_marginTop="44dp" />
 
                     <!-- 加载中 -->
                     <LinearLayout

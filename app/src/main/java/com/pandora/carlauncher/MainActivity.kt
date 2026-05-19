@@ -21,6 +21,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.app.ActivityManager
+import android.car.app.CarActivityView
+import android.hardware.display.DisplayManager
+import android.view.KeyEvent
+import android.view.MotionEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -1183,26 +1188,86 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 启动嵌入式导航（画中画模式）
-     * 直接启动地图APP，由地图APP负责定位/语音/离线/车道级导航
+     * 启动嵌入式导航（系统级方案）
+     * 使用 CarActivityView 嵌入地图APP到导航区域
+     * 参考：AOSP CarLauncher
      */
     private fun launchEmbeddedNav() {
-        // 1. 查找已安装的地图应用
-        val installed = findInstalledMapBinding()
-        if (installed.isEmpty()) {
-            Toast.makeText(this, "未检测到地图应用", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // 2. 优先使用 currentNavType 对应的地图
-        val target = if (currentNavType != "amap") {
-            installed.find { it.type == currentNavType } ?: installed.first()
+        val activityView = findViewById<CarActivityView>(R.id.nav_activity_view)
+        if (activityView != null) {
+            // 系统级方案：使用 CarActivityView 嵌入地图
+            startMapInActivityView(activityView)
         } else {
-            installed.first()
+            // 降级方案：直接启动地图APP
+            val installed = findInstalledMapBinding()
+            if (installed.isNotEmpty()) {
+                val target = installed.first()
+                launchMapAppPip(target.packageName, target.name)
+            } else {
+                Toast.makeText(this, "未检测到地图应用", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
 
-        // 3. 直接启动地图APP（画中画模式）
-        launchMapAppPip(target.packageName, target.name)
+    /**
+     * 在 CarActivityView 中启动地图APP
+     * 需要：系统签名 + ACTIVITY_EMBEDDING 权限
+     */
+    private fun startMapInActivityView(activityView: CarActivityView) {
+        try {
+            // 隐藏占位页，显示SDK容器
+            findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
+            findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
+            findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
+
+            // 设置回调
+            activityView.setCallback(object : CarActivityView.StateCallback() {
+                override fun onActivityViewReady(view: CarActivityView?) {
+                    Log.d(TAG, "ActivityView ready, 启动地图")
+                    try {
+                        // 启动地图APP到 ActivityView 中
+                        val intent = Intent.makeMainSelectorActivity(
+                            Intent.ACTION_MAIN,
+                            Intent.CATEGORY_APP_MAPS
+                        )
+                        view?.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "启动地图失败，尝试直接启动", e)
+                        // 降级：直接启动已安装的地图APP
+                        val installed = findInstalledMapBinding()
+                        if (installed.isNotEmpty()) {
+                            launchMapAppPip(installed.first().packageName, installed.first().name)
+                        }
+                    }
+                }
+
+                override fun onActivityViewDestroyed(view: CarActivityView?) {
+                    Log.d(TAG, "ActivityView destroyed")
+                }
+
+                override fun onTaskMovedToFront(taskId: Int) {
+                    Log.d(TAG, "Task moved to front: $taskId")
+                    // 确保Launcher回到前台
+                    try {
+                        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                        am.moveTaskToFront(this@MainActivity.taskId, 0)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "移动Launcher到前台失败", e)
+                    }
+                }
+            })
+
+            Log.d(TAG, "CarActivityView 已设置回调，等待就绪")
+        } catch (e: Exception) {
+            Log.e(TAG, "CarActivityView 不可用，降级为直接启动", e)
+            // 降级方案
+            val installed = findInstalledMapBinding()
+            if (installed.isNotEmpty()) {
+                launchMapAppPip(installed.first().packageName, installed.first().name)
+            } else {
+                Toast.makeText(this, "系统不支持嵌入模式，请安装地图应用", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     /**
