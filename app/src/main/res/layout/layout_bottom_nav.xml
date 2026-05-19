@@ -15,8 +15,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
         <ImageView
@@ -42,8 +42,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
         <ImageView
@@ -69,8 +69,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
         <ImageView
@@ -105,8 +105,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         android:background="?android:attr/selectableItemBackgroundBorderless">
 
         <ImageView
