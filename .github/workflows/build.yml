@@ -51,8 +51,8 @@ jobs:
     - name: Sign APKs
       run: |
         mkdir -p signing
-        echo "$PEM" | tr -d '\n\r ' | base64 -d > signing/platform.pem
-        echo "$X509" | tr -d '\n\r ' | base64 -d > signing/platform.x509.pem
+        printf '%s' "$PEM" > signing/platform.pem
+        printf '%s' "$X509" > signing/platform.x509.pem
         chmod 600 signing/platform.pem
         BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
         APKSIGNER="${BUILD_TOOLS}apksigner"
