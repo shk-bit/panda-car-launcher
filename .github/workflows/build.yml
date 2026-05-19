@@ -54,18 +54,61 @@ jobs:
     - name: Build Release APK
       run: gradle assembleRelease
 
+    - name: Decode Signing Keys
+      run: |
+        mkdir -p signing
+        echo "${{ secrets.SIGNING_PLATFORM_PEM }}" | base64 -d > signing/platform.pem
+        echo "${{ secrets.SIGNING_PLATFORM_X509 }}" | base64 -d > signing/platform.x509.pem
+        echo "${{ secrets.SIGNING_PLATFORM_PK8 }}" | base64 -d > signing/platform.pk8
+        chmod 600 signing/platform.pem signing/platform.pk8
+
+    - name: Sign Release APK with Platform Key
+      run: |
+        BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
+        APKSIGNER="${BUILD_TOOLS}apksigner"
+        echo "使用 apksigner: $APKSIGNER"
+        
+        UNSIGNED_APK=app/build/outputs/apk/release/app-release-unsigned.apk
+        SIGNED_APK=./apk/panda-car-launcher-v${{ steps.app_version.outputs.version }}-release.apk
+        
+        mkdir -p ./apk
+        
+        # 签名
+        $APKSIGNER sign \
+          --key signing/platform.pem \
+          --cert signing/platform.x509.pem \
+          --out "$SIGNED_APK" \
+          "$UNSIGNED_APK"
+        
+        # 验证签名
+        $APKSIGNER verify --print-certs "$SIGNED_APK"
+        
+        # 清理签名文件
+        rm -rf signing
+
+    - name: Sign Debug APK with Platform Key
+      run: |
+        BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
+        APKSIGNER="${BUILD_TOOLS}apksigner"
+        
+        UNSIGNED_APK=app/build/outputs/apk/debug/app-debug.apk
+        SIGNED_APK=./apk/panda-car-launcher-v${{ steps.app_version.outputs.version }}-debug.apk
+        
+        # 签名
+        $APKSIGNER sign \
+          --key signing/platform.pem \
+          --cert signing/platform.x509.pem \
+          --out "$SIGNED_APK" \
+          "$UNSIGNED_APK"
+        
+        # 验证签名
+        $APKSIGNER verify --print-certs "$SIGNED_APK"
+
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
-        path: app/build/outputs/apk/release/*.apk
-
-    - name: Rename APKs with Version
-      run: |
-        VERSION=${{ steps.app_version.outputs.version }}
-        mkdir -p ./apk
-        cp app/build/outputs/apk/debug/app-debug.apk ./apk/panda-car-launcher-v${VERSION}-debug.apk
-        cp app/build/outputs/apk/release/app-release-unsigned.apk ./apk/panda-car-launcher-v${VERSION}-release.apk
+        path: ./apk/*.apk
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -79,5 +122,9 @@ jobs:
           ### 下载
           - Debug 版本: `panda-car-launcher-v${{ steps.app_version.outputs.version }}-debug.apk`
           - Release 版本: `panda-car-launcher-v${{ steps.app_version.outputs.version }}-release.apk`
+          
+          ### 说明
+          - 所有 APK 均使用 platform 签名
+          - 安装到 `/system/priv-app/` 可获得系统级权限
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
