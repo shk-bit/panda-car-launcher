@@ -95,6 +95,21 @@ class MainActivity : AppCompatActivity() {
             setupBottomNavigation()
             setupNavButtons()
             startMusicRefresh()
+            
+            // 设置音乐歌词更新回调
+            MusicNotificationListener.onLyricsUpdate = { lyrics ->
+                runOnUiThread {
+                    val lyricsView = findViewById<TextView>(R.id.music_lyrics)
+                    if (lyricsView != null) {
+                        if (lyrics.isNotEmpty()) {
+                            lyricsView.text = lyrics
+                            lyricsView.visibility = View.VISIBLE
+                        } else {
+                            lyricsView.visibility = View.GONE
+                        }
+                    }
+                }
+            }
         } catch (e: Exception) {
             Log.e(TAG, "onCreate 初始化失败", e)
             Toast.makeText(this, "初始化异常: ${e.message}", Toast.LENGTH_LONG).show()
@@ -507,12 +522,26 @@ class MainActivity : AppCompatActivity() {
         val title = MusicNotificationListener.currentTitle
         val artist = MusicNotificationListener.currentArtist
         val isPlaying = MusicNotificationListener.isPlaying
+        val lyrics = MusicNotificationListener.currentLyrics
 
         findViewById<TextView>(R.id.music_title)?.text = if (title.isNotEmpty()) title else "未在播放"
         findViewById<TextView>(R.id.music_artist)?.text = artist
+        
+        // 更新播放/暂停图标（使用新图标）
         findViewById<ImageView>(R.id.music_play)?.setImageResource(
-            if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+            if (isPlaying) R.drawable.ic_pause_new else R.drawable.ic_play_new
         )
+        
+        // 更新歌词显示
+        val lyricsView = findViewById<TextView>(R.id.music_lyrics)
+        if (lyricsView != null) {
+            if (lyrics.isNotEmpty()) {
+                lyricsView.text = lyrics
+                lyricsView.visibility = View.VISIBLE
+            } else {
+                lyricsView.visibility = View.GONE
+            }
+        }
     }
 
     /**

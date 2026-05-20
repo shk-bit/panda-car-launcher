@@ -40,6 +40,13 @@ class MusicNotificationListener : NotificationListenerService() {
 
         // 回调接口
         var onMusicUpdate: ((title: String, artist: String, isPlaying: Boolean, pkg: String) -> Unit)? = null
+        
+        // 当前歌词
+        @Volatile
+        var currentLyrics = ""
+        
+        // 歌词更新回调
+        var onLyricsUpdate: ((lyrics: String) -> Unit)? = null
     }
 
     private var mediaSessionManager: MediaSessionManager? = null
@@ -89,14 +96,25 @@ class MusicNotificationListener : NotificationListenerService() {
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
         val artist = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
         val bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() ?: ""
+        val subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString() ?: ""
 
         // 优先使用大文本中的信息（通常包含更完整的歌手信息）
         val finalArtist = if (artist.isNotEmpty() && artist != bigText) artist else bigText
+
+        // 尝试从通知中提取歌词（部分音乐APP会在通知中显示歌词）
+        val lyrics = extractLyrics(extras, title, artist)
 
         if (title.isNotEmpty()) {
             currentTitle = title
             currentArtist = finalArtist
             currentPackageName = pkg
+            
+            // 更新歌词
+            if (lyrics.isNotEmpty() && lyrics != currentLyrics) {
+                currentLyrics = lyrics
+                onLyricsUpdate?.invoke(lyrics)
+                Log.d(TAG, "歌词更新: $lyrics")
+            }
 
             // 获取播放状态
             updatePlayState(pkg)
@@ -104,6 +122,35 @@ class MusicNotificationListener : NotificationListenerService() {
             onMusicUpdate?.invoke(currentTitle, currentArtist, isPlaying, currentPackageName)
             Log.d(TAG, "歌曲更新: $title - $finalArtist ($pkg)")
         }
+    }
+    
+    /**
+     * 从通知中提取歌词
+     * 不同音乐APP的歌词位置不同
+     */
+    private fun extractLyrics(extras: android.os.Bundle, title: String, artist: String): String {
+        // 尝试各种可能的歌词字段
+        val possibleLyrics = listOf(
+            extras.getCharSequence("android.textLines")?.toString(),  // 某些APP的歌词
+            extras.getCharSequence("android.messages")?.toString(),   // 消息样式
+            extras.getCharSequence(Notification.EXTRA_SUMMARY_TEXT)?.toString(),  // 摘要
+            extras.getCharSequence("android.bigText")?.toString()     // 大文本
+        )
+        
+        // 查找包含歌词特征（长度适中，不是标题或歌手）的文本
+        for (text in possibleLyrics) {
+            if (!text.isNullOrEmpty() && 
+                text != title && 
+                text != artist && 
+                text.length > 5 && 
+                text.length < 100 &&
+                !text.contains("正在播放") &&
+                !text.contains("点击播放")) {
+                return text.trim()
+            }
+        }
+        
+        return ""
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {

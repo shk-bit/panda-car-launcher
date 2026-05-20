@@ -308,39 +308,57 @@
 
                 </FrameLayout>
 
+                <!-- 歌词显示 -->
+                <TextView
+                    android:id="@+id/music_lyrics"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:text=""
+                    android:textColor="#FF6B6B"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:visibility="gone" />
+
                 <!-- 音乐控制按钮 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="4dp">
 
                     <ImageView
                         android:id="@+id/music_prev"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@drawable/ic_skip_prev"
-                        android:padding="8dp"
-                        android:background="@drawable/bg_control_btn" />
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_skip_prev_new"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_control_btn"
+                        android:tint="#FFFFFF" />
 
                     <ImageView
                         android:id="@+id/music_play"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:src="@drawable/ic_play"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:src="@drawable/ic_play_new"
                         android:background="@drawable/bg_icon_cyan"
-                        android:padding="10dp" />
+                        android:padding="12dp"
+                        android:tint="#FFFFFF" />
 
                     <ImageView
                         android:id="@+id/music_next"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@drawable/ic_skip_next"
-                        android:padding="8dp"
-                        android:background="@drawable/bg_control_btn" />
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_skip_next_new"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_control_btn"
+                        android:tint="#FFFFFF" />
 
                 </LinearLayout>
 
