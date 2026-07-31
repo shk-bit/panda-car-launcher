@@ -31,15 +31,15 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="16dp">
 
             <!-- 上半部分：导航卡片 - SDK导航控件容器 -->
             <FrameLayout
                 android:id="@+id/nav_card"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="2"
-                android:layout_marginBottom="8dp"
+                android:layout_weight="3"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/bg_plugin_card"
                 android:clipToOutline="true">
 
@@ -49,7 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="16dp"
+                    android:padding="20dp"
                     android:gravity="center">
 
                     <!-- 导航标题栏 -->
@@ -60,8 +60,8 @@
                         android:gravity="center_vertical">
 
                         <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
                             android:src="@drawable/ic_navigation"
                             android:tint="#00CED1" />
 
@@ -69,7 +69,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="10dp"
+                            android:layout_marginStart="12dp"
                             android:text="导航"
                             android:textColor="#FFFFFF"
                             android:textSize="18sp"
@@ -94,8 +94,8 @@
                         android:gravity="center">
 
                         <ImageView
-                            android:layout_width="72dp"
-                            android:layout_height="72dp"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
                             android:src="@drawable/ic_navigation"
                             android:tint="#4000CED1" />
 
@@ -103,10 +103,10 @@
                             android:id="@+id/nav_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
+                            android:layout_marginTop="16dp"
                             android:text="点击启动导航"
                             android:textColor="#B0FFFFFF"
-                            android:textSize="15sp" />
+                            android:textSize="16sp" />
 
                     </LinearLayout>
 

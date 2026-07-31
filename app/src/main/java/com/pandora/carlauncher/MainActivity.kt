@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.content.res.Configuration
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -28,6 +29,7 @@ import android.view.MotionEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import me.jessyan.autosize.AutoSize
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -77,6 +79,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
+            // 横竖屏 AutoSize 适配：根据方向使用不同设计基准
+            adaptAutoSizeForOrientation()
             setContentView(R.layout.activity_main)
             setupFullScreen()
 
@@ -126,17 +130,65 @@ class MainActivity : AppCompatActivity() {
         applyWallpaper()
         // 刷新导航地图类型显示
         updateNavSwitchText()
+        // 检查导航是否正在运行，更新导航区域 UI
+        updateNavAreaStatus()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        // 从悬浮导航返回桌面时，更新导航区域显示
+        if (intent?.getBooleanExtra("from_floating_nav", false) == true) {
+            updateNavAreaStatus()
+        }
+    }
+
+    /**
+     * 检查导航运行状态并更新导航区域 UI
+     *
+     * 如果 FloatingNavStatusService 正在运行，说明导航在后台运行，
+     * 在导航区域显示运行状态和切回按钮。
+     */
+    private fun updateNavAreaStatus() {
+        val mapResult = FloatingNavManager.getInstalledSelectedMap(this)
+        if (mapResult != null && isNavStatusServiceRunning()) {
+            val mapName = FloatingNavManager.getMapDisplayName(mapResult.mapType)
+            // 导航正在运行，显示运行状态
+            if (findViewById<View>(R.id.nav_sdk_container)?.visibility != View.VISIBLE) {
+                showNavRunning(mapName, mapResult.mode)
+            }
+        } else {
+            // 导航未运行，确保显示占位页
+            val sdkContainer = findViewById<View>(R.id.nav_sdk_container)
+            if (sdkContainer?.visibility == View.VISIBLE && !isNavStatusServiceRunning()) {
+                showNavPlaceholder()
+            }
+        }
+    }
+
+    /**
+     * 检查悬浮导航状态服务是否正在运行
+     */
+    private fun isNavStatusServiceRunning(): Boolean {
+        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        @Suppress("DEPRECATION")
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (FloatingNavStatusService::class.java.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 
     /**
      * 更新导航切换按钮的文字
-     * 显示当前选中的悬浮地图类型
+     * 显示当前选中的地图类型和安装状态
      */
     private fun updateNavSwitchText() {
         val mapType = FloatingNavManager.getSelectedMapType(this)
         val mapName = FloatingNavManager.getMapDisplayName(mapType)
-        val mapPkg = FloatingNavManager.findInstalledFloatingMap(this, mapType)
-        val displayText = if (mapPkg != null) {
+        val mapResult = FloatingNavManager.findInstalledMap(this, mapType)
+        val displayText = if (mapResult != null) {
             "$mapName ▼"
         } else {
             "$mapName (未安装) ▼"
@@ -144,10 +196,32 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.nav_switch)?.text = displayText
     }
 
-    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+    override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        // 横竖屏切换时重新加载布局
+        // 横竖屏切换时重新适配 AutoSize 并重载布局
+        adaptAutoSizeForOrientation()
         recreate()
+    }
+
+    /**
+     * 根据 ScreenOrientation 调用 AutoSize 适配
+     *
+     * 设计基准 1200×1920（竖屏）：
+     *   - 竖屏：designWidth=1200, designHeight=1920（原始）
+     *   - 横屏：designWidth=1920, designHeight=1200（交换）
+     *
+     * 这样横屏时 AutoSize 以宽度 1920 为基准缩放，
+     * 元素不会因宽度变大而被过度放大，避免比例失调。
+     */
+    private fun adaptAutoSizeForOrientation() {
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (isLandscape) {
+            // 横屏：以 1920 宽度为基准
+            AutoSize.autoConvertDensity(this, 1920f, true)
+        } else {
+            // 竖屏：以 1200 宽度为基准
+            AutoSize.autoConvertDensity(this, 1200f, true)
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -375,11 +449,12 @@ class MainActivity : AppCompatActivity() {
         }
         // 关闭导航 SDK
         findViewById<ImageView>(R.id.nav_close)?.setOnClickListener {
-            closeEmbeddedNav()
+            FloatingNavManager.stopFloatingStatusService(this)
+            showNavPlaceholder()
         }
-        // 点击导航卡片/占位页 -> 启动悬浮导航
+        // 点击导航卡片/占位页 -> 启动导航
         findViewById<View>(R.id.nav_placeholder)?.setOnClickListener {
-            FloatingNavManager.launchFloatingNav(this)
+            openNavigation()
         }
         // 音乐控制
         findViewById<ImageView>(R.id.music_prev)?.setOnClickListener {
@@ -1222,15 +1297,149 @@ class MainActivity : AppCompatActivity() {
     private var embeddedNavPkg: String? = null
 
     /**
-     * 打开导航（底部导航栏按钮）- 悬浮窗叠加方案
+     * 打开导航（底部导航栏按钮 + 占位页点击）
      *
-     * 使用 FloatingNavManager 启动悬浮导航：
-     * 1. 检查桌面 + 地图APP悬浮窗权限
-     * 2. 拉起修改版悬浮地图APP
-     * 3. 延时后自动切回桌面，使地图悬浮窗叠加在桌面上层
+     * 启动流程：
+     * 1. 先尝试嵌入式导航（CarActivityView，需系统签名）
+     * 2. 降级为悬浮导航方案：启动地图APP → 返回桌面 → 导航区域显示运行状态
+     * 3. 更新 nav_card UI：隐藏占位页，显示 SDK 容器和加载提示
      */
     private fun openNavigation() {
-        FloatingNavManager.launchFloatingNav(this)
+        val mapResult = FloatingNavManager.getInstalledSelectedMap(this)
+        val mapName = FloatingNavManager.getMapDisplayName(
+            FloatingNavManager.getSelectedMapType(this)
+        )
+
+        if (mapResult == null) {
+            // 未安装地图，直接走 FloatingNavManager 的引导流程
+            FloatingNavManager.launchFloatingNav(this)
+            return
+        }
+
+        // 更新导航区域 UI：切换到 SDK 容器视图，显示加载状态
+        showNavRunning(mapName, mapResult.mode)
+
+        // 启动悬浮导航（拉起地图APP + 延时返回桌面）
+        val launched = FloatingNavManager.launchFloatingNav(this)
+        if (!launched) {
+            // 启动失败，恢复占位页
+            showNavPlaceholder()
+        }
+    }
+
+    /**
+     * 显示导航运行状态
+     *
+     * 隐藏占位页，显示 SDK 容器，
+     * 在导航区域显示地图名称和运行模式提示。
+     *
+     * @param mapName 地图显示名称
+     * @param mode 导航模式（FLOATING / FULLSCREEN）
+     */
+    private fun showNavRunning(mapName: String, mode: FloatingNavManager.MapMode) {
+        findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
+        findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.nav_loading)?.visibility = View.VISIBLE
+
+        val modeText = when (mode) {
+            FloatingNavManager.MapMode.FLOATING -> "悬浮模式"
+            FloatingNavManager.MapMode.FULLSCREEN -> "全屏模式"
+        }
+        findViewById<TextView>(R.id.nav_loading_text)?.text = "$mapName 启动中（$modeText）..."
+        findViewById<TextView>(R.id.nav_sdk_title)?.text = mapName
+        findViewById<TextView>(R.id.nav_status)?.text = "导航运行中: $mapName"
+
+        // 延时隐藏加载提示（地图悬浮窗出现后）
+        Handler(Looper.getMainLooper()).postDelayed({
+            val mapResult = FloatingNavManager.getInstalledSelectedMap(this)
+            if (mapResult != null) {
+                findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
+                // 显示切回按钮区域
+                val container = findViewById<FrameLayout>(R.id.nav_activity_container)
+                if (container != null && container.childCount == 0) {
+                    // 没有嵌入的 ActivityView，显示运行状态提示
+                    showNavRunningPlaceholder(mapName, mode)
+                }
+            }
+        }, 3000)
+    }
+
+    /**
+     * 在导航容器中显示运行状态提示（非嵌入式时）
+     *
+     * 当无法嵌入地图 ActivityView 时，
+     * 在 nav_activity_container 中显示一个提示视图，
+     * 告知用户导航已在后台运行。
+     */
+    private fun showNavRunningPlaceholder(mapName: String, mode: FloatingNavManager.MapMode) {
+        val container = findViewById<FrameLayout>(R.id.nav_activity_container) ?: return
+        container.removeAllViews()
+
+        val statusView = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(32, 32, 32, 32)
+        }
+
+        val iconView = ImageView(this).apply {
+            setImageResource(R.drawable.ic_navigation)
+            setColorFilter(resources.getColor(R.color.primary, theme))
+            setPadding(0, 0, 0, 24)
+        }
+        val iconSize = (64 * resources.displayMetrics.density).toInt()
+        statusView.addView(iconView, LinearLayout.LayoutParams(iconSize, iconSize))
+
+        val titleView = TextView(this).apply {
+            text = "$mapName 正在运行"
+            setTextColor(resources.getColor(R.color.text_primary, theme))
+            textSize = 16f
+            gravity = Gravity.CENTER
+        }
+        statusView.addView(titleView)
+
+        val modeView = TextView(this).apply {
+            val modeText = when (mode) {
+                FloatingNavManager.MapMode.FLOATING -> "悬浮模式 · 返回桌面后地图叠加显示"
+                FloatingNavManager.MapMode.FULLSCREEN -> "全屏模式 · 点击悬浮按钮切回地图"
+            }
+            text = modeText
+            setTextColor(resources.getColor(R.color.text_secondary, theme))
+            textSize = 13f
+            gravity = Gravity.CENTER
+            setPadding(0, 12, 0, 0)
+        }
+        statusView.addView(modeView)
+
+        val btnSwitchBack = TextView(this).apply {
+            text = "切回地图"
+            setTextColor(resources.getColor(R.color.primary, theme))
+            textSize = 14f
+            gravity = Gravity.CENTER
+            setPadding(32, 24, 32, 16)
+            background = resources.getDrawable(R.drawable.bg_button_primary, theme)
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                FloatingNavManager.switchToMap(this@MainActivity)
+            }
+        }
+        statusView.addView(btnSwitchBack)
+
+        container.addView(statusView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ))
+    }
+
+    /**
+     * 恢复导航占位页
+     */
+    private fun showNavPlaceholder() {
+        findViewById<View>(R.id.nav_sdk_container)?.visibility = View.GONE
+        findViewById<View>(R.id.nav_placeholder)?.visibility = View.VISIBLE
+        findViewById<TextView>(R.id.nav_status)?.text = "点击启动导航"
+        // 清理运行状态占位视图
+        findViewById<FrameLayout>(R.id.nav_activity_container)?.removeAllViews()
     }
 
     /**
