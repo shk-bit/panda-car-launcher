@@ -17,20 +17,34 @@
         <package android:name="com.spotify.music" />
         <package android:name="com.apple.android.music" />
 
-        <!-- 悬浮高德地图修改版包名（用于检测安装状态） -->
+        <!-- 高德地图包名（悬浮修改版 + 车机版 + 手机版） -->
         <package android:name="com.autonavi.amapauto.floating" />
         <package android:name="com.autonavi.amapauto.overlay" />
         <package android:name="com.autonavi.amapauto.chenmo" />
         <package android:name="com.autonavi.amapauto.u3d" />
         <package android:name="com.autonavi.amapauto.superv" />
         <package android:name="com.autonavi.amapauto.xf" />
+        <package android:name="com.autonavi.amapauto" />
+        <package android:name="com.autonavi.amapauto.pad" />
+        <package android:name="com.autonavi.minimap" />
 
-        <!-- 悬浮百度地图修改版包名（用于检测安装状态） -->
+        <!-- 百度地图包名（悬浮修改版 + 车机版 + 手机版） -->
         <package android:name="com.baidu.naviauto.floating" />
         <package android:name="com.baidu.naviauto.overlay" />
         <package android:name="com.baidu.naviauto.superv" />
         <package android:name="com.baidu.naviauto.xf" />
         <package android:name="com.baidu.BaiduMap.floating" />
+        <package android:name="com.baidu.naviauto" />
+        <package android:name="com.baidu.carlife" />
+        <package android:name="com.baidu.BaiduMap" />
+        <package android:name="com.baidu.map.location" />
+
+        <!-- 腾讯地图包名（悬浮修改版 + 车机版 + 手机版） -->
+        <package android:name="com.tencent.map.floating" />
+        <package android:name="com.tencent.map.overlay" />
+        <package android:name="com.tencent.map" />
+        <package android:name="com.tencent.map.car" />
+        <package android:name="com.tencent.map.lite" />
     </queries>
 
     <!-- 网络权限 -->
@@ -243,6 +257,13 @@
             android:name=".FloatingMapService"
             android:exported="false"
             android:foregroundServiceType="location" />
+
+        <!-- 悬浮导航状态服务（导航运行时显示悬浮按钮，可快速切回地图） -->
+        <service
+            android:name=".FloatingNavStatusService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
 
         <!-- 音乐通知监听服务（布丁方式） -->
         <service

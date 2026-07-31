@@ -18,314 +18,289 @@ import android.widget.Toast
  * 悬浮导航管理器
  *
  * 【核心原理】
- * 依赖民间修改版【悬浮高德地图车机版 / 悬浮百度地图车机版】，
- * 地图APP自身持有 SYSTEM_ALERT_WINDOW 悬浮窗能力。
- * PandaDesk 仅做：
- *   1. 权限校验（桌面自身 + 第三方地图APP）
- *   2. 应用调度（拉起地图APP → 延时返回桌面）
- *   3. 配置管理（SharedPreferences 持久化）
+ * 支持两种导航模式：
+ *   1. 悬浮叠加模式：依赖修改版悬浮地图APP，地图自身持有 SYSTEM_ALERT_WINDOW，
+ *      拉起后延时返回桌面，地图悬浮窗叠加在桌面上层。
+ *   2. 跳转返回模式：使用官方车机版地图（高德/百度/腾讯），
+ *      拉起地图全屏运行，延时后自动返回桌面。
+ *      桌面显示一个悬浮状态按钮，点击可快速切回地图。
+ *
+ * 【支持地图类型】
+ *   - 高德地图（车机版 + 修改悬浮版 + 手机版）
+ *   - 百度地图（车机版 + 修改悬浮版 + 手机版）
+ *   - 腾讯地图（车机版 + 手机版）
  *
  * 【不做什么】
- *   - 不集成地图SDK
- *   - 不渲染地图画面
+ *   - 不集成地图SDK / 不渲染地图画面
  *   - 不使用TaskView / ActivityView / 屏幕捕获
  *   - 不使用任何需要系统签名、root、注入、进程劫持的API
  *
  * 【目标设备】东风风神AX7马赫版 Windlink车机 (Android 9)
- * 【应用权限】第三方普通应用，无系统签名
- *
- * 【参考产品】布丁UI、氢桌面、嘟嘟桌面 悬浮导航功能
  */
 object FloatingNavManager {
 
     private const val TAG = "FloatingNavManager"
 
-    // ======================== SharedPreferences 键名 ========================
+    // ======================== SharedPreferences ========================
 
-    /** SharedPreferences 文件名 */
     private const val PREF_NAME = "floating_nav_prefs"
-
-    /** 选中的地图类型： "amap"（悬浮高德） / "baidu"（悬浮百度） */
     private const val KEY_MAP_TYPE = "selected_map_type"
-
-    /** 是否在启动导航后自动返回桌面 */
     private const val KEY_AUTO_RETURN = "auto_return_enabled"
-
-    /** 自动返回桌面的延时时间（毫秒） */
     private const val KEY_RETURN_DELAY = "return_delay_ms"
+    private const val KEY_FLOATING_WIDGET = "floating_widget_enabled"
 
     // ======================== 地图类型常量 ========================
 
-    /** 悬浮高德地图 */
     const val MAP_TYPE_AMAP = "amap"
-
-    /** 悬浮百度地图 */
     const val MAP_TYPE_BAIDU = "baidu"
+    const val MAP_TYPE_TENCENT = "tencent"
 
-    // ======================== 修改版悬浮地图APP包名 ========================
+    // ======================== 地图APP包名配置 ========================
 
     /**
-     * 悬浮高德地图车机版 - 已知修改版包名列表
+     * 地图APP配置
      *
-     * 注意：民间修改版包名可能因版本而异，此处列出常见包名。
-     * 官方原版高德包名为 com.autonavi.amapauto，不支持悬浮窗叠加。
-     * 用户需安装修改版（悬浮版），修改版包名通常带后缀或完全不同。
+     * @param floatingPackages 修改版悬浮地图包名（支持悬浮窗叠加）
+     * @param carPackages 官方车机版包名（全屏运行，不支持悬浮叠加）
+     * @param phonePackages 手机版包名（全屏运行）
      */
-    private val FLOATING_AMAP_PACKAGES = listOf(
-        "com.autonavi.amapauto.floating",     // 悬浮高德修改版
-        "com.autonavi.amapauto.overlay",      // 悬浮叠加版
-        "com.autonavi.amapauto.chenmo",       // 高德车机共存版（部分支持悬浮）
-        "com.autonavi.amapauto.u3d",          // U3D修改版（部分支持悬浮）
-        "com.autonavi.amapauto.superv",      // 超级版修改
-        "com.autonavi.amapauto.xf",           // 悬浮修改版
-        // 如有其他修改版包名，可在此追加
+    data class MapAppConfig(
+        val floatingPackages: List<String>,
+        val carPackages: List<String>,
+        val phonePackages: List<String>
     )
 
     /**
-     * 悬浮百度地图车机版 - 已知修改版包名列表
+     * 各地图类型的APP配置
      *
-     * 官方原版百度地图包名为 com.baidu.naviauto，不支持悬浮窗叠加。
-     * 用户需安装修改版（悬浮版）。
+     * 查找优先级：悬浮修改版 > 车机版 > 手机版
      */
-    private val FLOATING_BAIDU_PACKAGES = listOf(
-        "com.baidu.naviauto.floating",        // 悬浮百度修改版
-        "com.baidu.naviauto.overlay",         // 悬浮叠加版
-        "com.baidu.naviauto.superv",          // 超级版修改
-        "com.baidu.naviauto.xf",              // 悬浮修改版
-        "com.baidu.BaiduMap.floating",        // 手机版悬浮修改
-        // 如有其他修改版包名，可在此追加
-    )
-
-    /**
-     * 各地图类型对应的修改版包名列表
-     */
-    private val FLOATING_MAP_PACKAGES = mapOf(
-        MAP_TYPE_AMAP to FLOATING_AMAP_PACKAGES,
-        MAP_TYPE_BAIDU to FLOATING_BAIDU_PACKAGES
+    private val MAP_CONFIGS = mapOf(
+        MAP_TYPE_AMAP to MapAppConfig(
+            floatingPackages = listOf(
+                "com.autonavi.amapauto.floating",   // 悬浮高德修改版
+                "com.autonavi.amapauto.overlay",    // 悬浮叠加版
+                "com.autonavi.amapauto.chenmo",     // 共存版（部分支持悬浮）
+                "com.autonavi.amapauto.u3d",        // U3D修改版
+                "com.autonavi.amapauto.superv",     // 超级版修改
+                "com.autonavi.amapauto.xf"          // 悬浮修改版
+            ),
+            carPackages = listOf(
+                "com.autonavi.amapauto",            // 高德地图车机版（官方）
+                "com.autonavi.amapauto.pad"        // 高德地图车机Pad版
+            ),
+            phonePackages = listOf(
+                "com.autonavi.minimap"              // 高德地图手机版
+            )
+        ),
+        MAP_TYPE_BAIDU to MapAppConfig(
+            floatingPackages = listOf(
+                "com.baidu.naviauto.floating",      // 悬浮百度修改版
+                "com.baidu.naviauto.overlay",       // 悬浮叠加版
+                "com.baidu.naviauto.superv",        // 超级版修改
+                "com.baidu.naviauto.xf",            // 悬浮修改版
+                "com.baidu.BaiduMap.floating"       // 手机版悬浮修改
+            ),
+            carPackages = listOf(
+                "com.baidu.naviauto",               // 百度地图车机版（官方）
+                "com.baidu.carlife"                 // 百度CarLife
+            ),
+            phonePackages = listOf(
+                "com.baidu.BaiduMap",               // 百度地图手机版
+                "com.baidu.map.location"            // 百度地图定位版
+            )
+        ),
+        MAP_TYPE_TENCENT to MapAppConfig(
+            floatingPackages = listOf(
+                "com.tencent.map.floating",         // 悬浮腾讯修改版
+                "com.tencent.map.overlay"           // 悬浮叠加版
+            ),
+            carPackages = listOf(
+                "com.tencent.map",                   // 腾讯地图（官方）
+                "com.tencent.map.car"               // 腾讯地图车机版
+            ),
+            phonePackages = listOf(
+                "com.tencent.map.lite"              // 腾讯地图极速版
+            )
+        )
     )
 
     /**
      * 各地图类型的显示名称
      */
     private val MAP_DISPLAY_NAMES = mapOf(
-        MAP_TYPE_AMAP to "悬浮高德地图",
-        MAP_TYPE_BAIDU to "悬浮百度地图"
+        MAP_TYPE_AMAP to "高德地图",
+        MAP_TYPE_BAIDU to "百度地图",
+        MAP_TYPE_TENCENT to "腾讯地图"
     )
 
     /** 默认自动返回延时（毫秒） */
     private const val DEFAULT_RETURN_DELAY = 2500L
 
-    // ======================== 配置读写方法 ========================
+    // ======================== 配置读写 ========================
 
-    /**
-     * 获取当前选中的地图类型
-     *
-     * @param context 上下文
-     * @return "amap" 或 "baidu"，默认 "amap"
-     */
     fun getSelectedMapType(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return prefs.getString(KEY_MAP_TYPE, MAP_TYPE_AMAP) ?: MAP_TYPE_AMAP
     }
 
-    /**
-     * 设置选中的地图类型
-     *
-     * @param context 上下文
-     * @param mapType "amap" 或 "baidu"
-     */
     fun setSelectedMapType(context: Context, mapType: String) {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_MAP_TYPE, mapType)
-            .apply()
+            .edit().putString(KEY_MAP_TYPE, mapType).apply()
         Log.d(TAG, "地图类型已切换: $mapType")
     }
 
-    /**
-     * 是否启用「启动导航自动返回桌面」
-     *
-     * @param context 上下文
-     * @return true=启用（默认），false=不自动返回
-     */
     fun isAutoReturnEnabled(context: Context): Boolean {
-        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getBoolean(KEY_AUTO_RETURN, true)
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .getBoolean(KEY_AUTO_RETURN, true)
     }
 
-    /**
-     * 设置「启动导航自动返回桌面」开关
-     *
-     * @param context 上下文
-     * @param enabled true=启用，false=关闭
-     */
     fun setAutoReturnEnabled(context: Context, enabled: Boolean) {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putBoolean(KEY_AUTO_RETURN, enabled)
-            .apply()
-        Log.d(TAG, "自动返回桌面: ${if (enabled) "开启" else "关闭"}")
+            .edit().putBoolean(KEY_AUTO_RETURN, enabled).apply()
     }
 
-    /**
-     * 获取自动返回延时（毫秒）
-     */
     fun getReturnDelay(context: Context): Long {
-        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getLong(KEY_RETURN_DELAY, DEFAULT_RETURN_DELAY)
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .getLong(KEY_RETURN_DELAY, DEFAULT_RETURN_DELAY)
     }
 
     /**
-     * 设置自动返回延时（毫秒）
+     * 是否启用导航悬浮状态按钮
+     * 开启后，导航运行期间桌面显示一个小悬浮按钮，点击可快速切回地图
      */
-    fun setReturnDelay(context: Context, delayMs: Long) {
+    fun isFloatingWidgetEnabled(context: Context): Boolean {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .getBoolean(KEY_FLOATING_WIDGET, true)
+    }
+
+    fun setFloatingWidgetEnabled(context: Context, enabled: Boolean) {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putLong(KEY_RETURN_DELAY, delayMs)
-            .apply()
+            .edit().putBoolean(KEY_FLOATING_WIDGET, enabled).apply()
     }
 
     // ======================== 地图应用检测 ========================
 
     /**
-     * 检测指定类型的修改版悬浮地图APP是否已安装
+     * 查找已安装的地图APP
      *
-     * @param context 上下文
-     * @param mapType 地图类型："amap" 或 "baidu"
-     * @return 已安装的包名，若未安装返回 null
+     * 查找优先级：悬浮修改版 > 车机版 > 手机版
+     *
+     * @return MapInstallResult 包含包名和模式
+     */
+    fun findInstalledMap(context: Context, mapType: String): MapInstallResult? {
+        val config = MAP_CONFIGS[mapType] ?: return null
+        val pm = context.packageManager
+
+        // 1. 优先查找悬浮修改版
+        for (pkg in config.floatingPackages) {
+            if (isPackageInstalled(pm, pkg)) {
+                Log.d(TAG, "找到悬浮版地图: $pkg ($mapType)")
+                return MapInstallResult(pkg, MapMode.FLOATING, mapType)
+            }
+        }
+
+        // 2. 查找车机版
+        for (pkg in config.carPackages) {
+            if (isPackageInstalled(pm, pkg)) {
+                Log.d(TAG, "找到车机版地图: $pkg ($mapType)")
+                return MapInstallResult(pkg, MapMode.FULLSCREEN, mapType)
+            }
+        }
+
+        // 3. 查找手机版
+        for (pkg in config.phonePackages) {
+            if (isPackageInstalled(pm, pkg)) {
+                Log.d(TAG, "找到手机版地图: $pkg ($mapType)")
+                return MapInstallResult(pkg, MapMode.FULLSCREEN, mapType)
+            }
+        }
+
+        return null
+    }
+
+    private fun isPackageInstalled(pm: PackageManager, pkg: String): Boolean {
+        return try {
+            pm.getPackageInfo(pkg, 0)
+            true
+        } catch (_: PackageManager.NameNotFoundException) {
+            false
+        }
+    }
+
+    /**
+     * 检测指定类型是否安装了悬浮修改版
      */
     fun findInstalledFloatingMap(context: Context, mapType: String): String? {
-        val packages = FLOATING_MAP_PACKAGES[mapType] ?: return null
+        val config = MAP_CONFIGS[mapType] ?: return null
         val pm = context.packageManager
-        for (pkg in packages) {
-            try {
-                // 检查应用是否已安装
-                pm.getPackageInfo(pkg, 0)
-                Log.d(TAG, "找到已安装的悬浮地图: $pkg (类型: $mapType)")
-                return pkg
-            } catch (_: PackageManager.NameNotFoundException) {
-                // 未安装此包名，继续尝试下一个
-            }
+        for (pkg in config.floatingPackages) {
+            if (isPackageInstalled(pm, pkg)) return pkg
         }
         return null
     }
 
     /**
-     * 获取当前选中地图类型的已安装包名
-     * 若修改版未安装，则返回 null
-     *
-     * @param context 上下文
-     * @return 包名或 null
+     * 获取当前选中地图类型的已安装结果
      */
-    fun getInstalledSelectedMapPackage(context: Context): String? {
-        val mapType = getSelectedMapType(context)
-        return findInstalledFloatingMap(context, mapType)
+    fun getInstalledSelectedMap(context: Context): MapInstallResult? {
+        return findInstalledMap(context, getSelectedMapType(context))
     }
 
-    /**
-     * 获取地图类型的显示名称
-     */
     fun getMapDisplayName(mapType: String): String {
         return MAP_DISPLAY_NAMES[mapType] ?: "未知地图"
     }
 
     /**
-     * 检测是否安装了任何修改版悬浮地图（用于全局判断）
-     *
-     * @param context 上下文
-     * @return 已安装的悬浮地图类型列表
+     * 获取所有已安装的地图类型列表
      */
-    fun getInstalledFloatingMaps(context: Context): List<String> {
-        val installed = mutableListOf<String>()
-        for (mapType in FLOATING_MAP_PACKAGES.keys) {
-            if (findInstalledFloatingMap(context, mapType) != null) {
-                installed.add(mapType)
-            }
+    fun getInstalledMaps(context: Context): List<MapInstallResult> {
+        val results = mutableListOf<MapInstallResult>()
+        for (mapType in MAP_CONFIGS.keys) {
+            findInstalledMap(context, mapType)?.let { results.add(it) }
         }
-        return installed
+        return results
+    }
+
+    /**
+     * 获取所有支持的地图类型
+     */
+    fun getAllMapTypes(): List<String> {
+        return MAP_CONFIGS.keys.toList()
     }
 
     // ======================== 权限校验 ========================
 
-    /**
-     * 检测桌面自身是否拥有「显示在其他应用上层」悬浮窗权限
-     *
-     * Android 6.0+ 需要通过 Settings.canDrawOverlays() 判断。
-     * Android 9 (API 28) 完全支持此方法。
-     *
-     * @param context 上下文
-     * @return true=已有权限，false=无权限
-     */
     fun hasOwnOverlayPermission(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Settings.canDrawOverlays(context)
         } else {
-            // Android 6.0 以下默认有权限
             true
         }
     }
 
-    /**
-     * 检测第三方APP是否拥有悬浮窗权限
-     *
-     * 通过 AppOpsManager 查询目标应用是否被授予 SYSTEM_ALERT_WINDOW 操作权限。
-     * 这是 Android 公开 API，不需要系统签名。
-     *
-     * 注意：此方法可能因厂商定制ROM而返回不准确的结果，
-     *       Windlink 车机系统基于 Android 9，通常支持此查询。
-     *
-     * @param context 上下文
-     * @param packageName 目标应用包名
-     * @return true=已有权限，false=无权限或无法查询
-     */
     fun hasAppOverlayPermission(context: Context, packageName: String): Boolean {
         if (packageName.isEmpty()) return false
-
         return try {
             val pm = context.packageManager
-            // 获取目标应用的 ApplicationInfo
             val appInfo = pm.getApplicationInfo(packageName, 0)
-
-            // 方法1：通过 AppOpsManager 检查（Android 4.3+，API 19+）
             val appOpsManager = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-
-            // OP_SYSTEM_ALERT_WINDOW = 24
-            // 使用公开 API 检查模式
             val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Android 10+ 使用新方法
                 appOpsManager.unsafeCheckOpNoThrow(
-                    AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW,
-                    appInfo.uid,
-                    packageName
+                    AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW, appInfo.uid, packageName
                 )
             } else {
-                // Android 9 及以下使用 checkOpNoThrow
                 @Suppress("DEPRECATION")
                 appOpsManager.checkOpNoThrow(
-                    AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW,
-                    appInfo.uid,
-                    packageName
+                    AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW, appInfo.uid, packageName
                 )
             }
-
-            // MODE_ALLOWED = 0 表示已授权
-            val hasPermission = mode == AppOpsManager.MODE_ALLOWED
-            Log.d(TAG, "应用 $packageName 悬浮窗权限: $hasPermission (mode=$mode)")
-            hasPermission
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.w(TAG, "应用 $packageName 未安装，无法检查权限")
-            false
+            mode == AppOpsManager.MODE_ALLOWED
         } catch (e: Exception) {
-            Log.e(TAG, "检查应用悬浮窗权限失败: $packageName", e)
             false
         }
     }
 
-    /**
-     * 跳转到桌面自身的悬浮窗权限授权页面
-     *
-     * @param context 上下文（建议传入 Activity）
-     */
     fun requestOwnOverlayPermission(context: Context) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -337,43 +312,25 @@ object FloatingNavManager {
                 context.startActivity(intent)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "跳转悬浮窗授权页面失败", e)
-            // 降级：跳转到应用详情页
             try {
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 intent.data = Uri.parse("package:${context.packageName}")
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             } catch (e2: Exception) {
-                Log.e(TAG, "降级跳转也失败", e2)
                 Toast.makeText(context, "无法打开权限设置页面", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    /**
-     * 跳转到第三方地图APP的悬浮窗权限授权页面
-     *
-     * 注意：Android 不允许直接跳转到其他APP的权限页面，
-     *       这里跳转到目标APP的「应用详情页」，用户需手动点击「显示在其他应用上层」。
-     *
-     * @param context 上下文
-     * @param packageName 目标地图APP包名
-     */
     fun requestAppOverlayPermission(context: Context, packageName: String) {
         try {
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
             intent.data = Uri.parse("package:$packageName")
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
-            Toast.makeText(
-                context,
-                "请在应用详情中开启「显示在其他应用上层」权限",
-                Toast.LENGTH_LONG
-            ).show()
+            Toast.makeText(context, "请在应用详情中开启「显示在其他应用上层」权限", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
-            Log.e(TAG, "跳转第三方应用权限页面失败: $packageName", e)
-            // 降级：跳转到应用管理列表
             try {
                 val intent = Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -391,88 +348,84 @@ object FloatingNavManager {
      *
      * 【完整流程】
      * 1. 检查桌面自身悬浮窗权限
-     * 2. 检查目标修改版地图APP是否已安装
-     * 3. 检查目标地图APP的悬浮窗权限
-     * 4. 拉起地图APP
-     * 5. 延时后自动切回 PandaDesk 桌面（使地图悬浮窗叠加在桌面上层）
+     * 2. 查找已安装的地图APP（悬浮版 > 车机版 > 手机版）
+     * 3. 拉起地图APP
+     * 4. 延时后自动切回桌面
+     * 5. 启动悬浮状态按钮服务（显示导航运行状态，可快速切回地图）
      *
-     * @param activity 调用方的 Activity（通常是 MainActivity）
-     * @return true=成功启动，false=启动失败（已有错误提示）
+     * @param activity 调用方 Activity
+     * @return true=成功启动
      */
     fun launchFloatingNav(activity: Activity): Boolean {
-        Log.d(TAG, "===== 开始启动悬浮导航 =====")
+        Log.d(TAG, "===== 开始启动导航 =====")
 
-        // 步骤1：检查桌面自身悬浮窗权限
+        // 步骤1：检查桌面悬浮窗权限
         if (!hasOwnOverlayPermission(activity)) {
-            Log.w(TAG, "桌面自身缺少悬浮窗权限")
-            showPermissionGuide(
-                activity,
-                "桌面缺少悬浮窗权限",
-                "PandaDesk 需要悬浮窗权限才能在导航期间保持桌面在底层显示。\n\n" +
+            showPermissionGuide(activity, "桌面缺少悬浮窗权限",
+                "PandaDesk 需要悬浮窗权限才能在导航期间保持桌面显示。\n\n" +
                     "请点击「去授权」，在系统设置中开启「显示在其他应用上层」。",
-                targetPackage = null
-            )
+                null)
             return false
         }
 
-        // 步骤2：获取选中的地图类型
+        // 步骤2：获取选中地图类型
         val mapType = getSelectedMapType(activity)
         val mapDisplayName = getMapDisplayName(mapType)
-        Log.d(TAG, "选中地图类型: $mapType ($mapDisplayName)")
+        Log.d(TAG, "选中地图: $mapType ($mapDisplayName)")
 
-        // 步骤3：检查修改版地图APP是否已安装
-        val mapPackage = findInstalledFloatingMap(activity, mapType)
-        if (mapPackage == null) {
-            Log.w(TAG, "修改版悬浮地图未安装: $mapType")
+        // 步骤3：查找已安装的地图APP
+        val mapResult = findInstalledMap(activity, mapType)
+        if (mapResult == null) {
+            Log.w(TAG, "地图未安装: $mapType")
             showMapNotInstalledGuide(activity, mapType)
             return false
         }
 
-        // 步骤4：检查目标地图APP的悬浮窗权限
-        if (!hasAppOverlayPermission(activity, mapPackage)) {
-            Log.w(TAG, "地图APP缺少悬浮窗权限: $mapPackage")
-            showPermissionGuide(
-                activity,
-                "$mapDisplayName 缺少悬浮窗权限",
-                "$mapDisplayName 需要悬浮窗权限才能在桌面上层叠加显示。\n\n" +
-                    "请点击「去授权」，在应用详情中开启「显示在其他应用上层」。",
-                targetPackage = mapPackage
-            )
-            return false
-        }
+        Log.d(TAG, "地图模式: ${mapResult.mode} (${mapResult.packageName})")
 
-        // 步骤5：拉起地图APP
-        Log.d(TAG, "拉起地图APP: $mapPackage")
-        val launched = launchMapApp(activity, mapPackage)
+        // 步骤4：拉起地图APP
+        val launched = launchMapApp(activity, mapResult.packageName)
         if (!launched) {
             Toast.makeText(activity, "启动 $mapDisplayName 失败", Toast.LENGTH_SHORT).show()
             return false
         }
 
-        Toast.makeText(activity, "正在启动 $mapDisplayName ...", Toast.LENGTH_SHORT).show()
-
-        // 步骤6：延时后自动切回 PandaDesk 桌面
-        if (isAutoReturnEnabled(activity)) {
-            val delay = getReturnDelay(activity)
-            Log.d(TAG, "将在 ${delay}ms 后自动返回桌面")
-            Handler(Looper.getMainLooper()).postDelayed({
-                returnToDesktop(activity)
-            }, delay)
+        // 根据模式提示用户
+        when (mapResult.mode) {
+            MapMode.FLOATING -> {
+                Toast.makeText(activity, "正在启动 $mapDisplayName（悬浮模式）...", Toast.LENGTH_SHORT).show()
+            }
+            MapMode.FULLSCREEN -> {
+                Toast.makeText(activity, "正在启动 $mapDisplayName（全屏模式）...", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        Log.d(TAG, "===== 悬浮导航启动完成 =====")
+        // 步骤5：延时后自动切回桌面
+        if (isAutoReturnEnabled(activity)) {
+            val delay = getReturnDelay(activity)
+            Log.d(TAG, "将在 ${delay}ms 后返回桌面")
+            Handler(Looper.getMainLooper()).postDelayed({
+                returnToDesktop(activity)
+                // 返回桌面后启动悬浮状态按钮
+                if (isFloatingWidgetEnabled(activity)) {
+                    startFloatingStatusService(activity, mapResult)
+                }
+            }, delay)
+        } else {
+            // 不自动返回，但也启动悬浮状态按钮（延迟启动）
+            if (isFloatingWidgetEnabled(activity)) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    startFloatingStatusService(activity, mapResult)
+                }, 1000)
+            }
+        }
+
+        Log.d(TAG, "===== 导航启动完成 =====")
         return true
     }
 
     /**
      * 拉起地图APP
-     *
-     * 使用 PackageManager.getLaunchIntentForPackage() 获取启动Intent，
-     * 这是 Android 公开 API，不需要特殊权限。
-     *
-     * @param context 上下文
-     * @param packageName 地图APP包名
-     * @return true=成功拉起，false=失败
      */
     private fun launchMapApp(context: Context, packageName: String): Boolean {
         return try {
@@ -480,14 +433,13 @@ object FloatingNavManager {
             val intent = pm.getLaunchIntentForPackage(packageName)
             if (intent != null) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                // 传递悬浮模式参数（部分修改版地图支持识别）
                 intent.putExtra("floating_mode", true)
                 intent.putExtra("overlay_mode", true)
                 context.startActivity(intent)
                 Log.d(TAG, "地图APP已拉起: $packageName")
                 true
             } else {
-                Log.e(TAG, "无法获取地图APP的启动Intent: $packageName")
+                Log.e(TAG, "无法获取启动Intent: $packageName")
                 false
             }
         } catch (e: Exception) {
@@ -498,13 +450,6 @@ object FloatingNavManager {
 
     /**
      * 自动返回桌面
-     *
-     * 通过 Intent 启动 PandaDesk 自身的 MainActivity，
-     * 使桌面回到前台，地图悬浮窗叠加在桌面上层。
-     *
-     * 使用 FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_REORDER_TO_FRONT 确保桌面被拉到前台。
-     *
-     * @param context 上下文
      */
     private fun returnToDesktop(context: Context) {
         try {
@@ -515,13 +460,11 @@ object FloatingNavManager {
                     Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP
                 )
-                // 标记为从导航返回，MainActivity 可据此做特殊处理
                 putExtra("from_floating_nav", true)
             }
             context.startActivity(intent)
         } catch (e: Exception) {
             Log.e(TAG, "返回桌面失败", e)
-            // 降级：使用 Home Intent
             try {
                 val homeIntent = Intent(Intent.ACTION_MAIN).apply {
                     addCategory(Intent.CATEGORY_HOME)
@@ -534,103 +477,146 @@ object FloatingNavManager {
         }
     }
 
-    // ======================== 错误引导对话框 ========================
-
     /**
-     * 显示权限引导对话框
-     *
-     * @param context 上下文
-     * @param title 标题
-     * @param message 提示信息
-     * @param targetPackage 目标包名（null=桌面自身，非null=第三方地图APP）
+     * 启动悬浮状态按钮服务
+     * 在桌面显示一个小悬浮按钮，点击可快速切回地图
      */
-    private fun showPermissionGuide(
-        context: Context,
-        title: String,
-        message: String,
-        targetPackage: String?
-    ) {
-        if (context !is Activity) return
-
-        android.app.AlertDialog.Builder(context)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("去授权") { _, _ ->
-                if (targetPackage != null) {
-                    requestAppOverlayPermission(context, targetPackage)
-                } else {
-                    requestOwnOverlayPermission(context)
-                }
+    private fun startFloatingStatusService(context: Context, mapResult: MapInstallResult) {
+        try {
+            val intent = Intent(context, FloatingNavStatusService::class.java).apply {
+                putExtra("map_package", mapResult.packageName)
+                putExtra("map_type", mapResult.mapType)
+                putExtra("map_mode", mapResult.mode.name)
             }
-            .setNegativeButton("取消", null)
-            .show()
+            context.startService(intent)
+            Log.d(TAG, "悬浮状态服务已启动")
+        } catch (e: Exception) {
+            Log.e(TAG, "启动悬浮状态服务失败", e)
+        }
     }
 
     /**
-     * 显示地图未安装引导对话框
-     *
-     * 告知用户需要安装修改版悬浮地图，原版不支持悬浮导航。
-     *
-     * @param context 上下文
-     * @param mapType 地图类型
+     * 停止悬浮状态按钮服务
      */
+    fun stopFloatingStatusService(context: Context) {
+        try {
+            context.stopService(Intent(context, FloatingNavStatusService::class.java))
+            Log.d(TAG, "悬浮状态服务已停止")
+        } catch (e: Exception) {
+            Log.e(TAG, "停止悬浮状态服务失败", e)
+        }
+    }
+
+    /**
+     * 切回地图APP
+     */
+    fun switchToMap(context: Context) {
+        val mapResult = getInstalledSelectedMap(context) ?: return
+        try {
+            val pm = context.packageManager
+            val intent = pm.getLaunchIntentForPackage(mapResult.packageName)
+            intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            context.startActivity(intent)
+            Log.d(TAG, "切回地图: ${mapResult.packageName}")
+        } catch (e: Exception) {
+            Log.e(TAG, "切回地图失败", e)
+            Toast.makeText(context, "切回地图失败", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // ======================== 错误引导 ========================
+
+    private fun showPermissionGuide(context: Context, title: String, message: String, targetPackage: String?) {
+        if (context !is Activity) return
+        android.app.AlertDialog.Builder(context)
+            .setTitle(title).setMessage(message)
+            .setPositiveButton("去授权") { _, _ ->
+                if (targetPackage != null) requestAppOverlayPermission(context, targetPackage)
+                else requestOwnOverlayPermission(context)
+            }
+            .setNegativeButton("取消", null).show()
+    }
+
     private fun showMapNotInstalledGuide(context: Context, mapType: String) {
         if (context !is Activity) return
-
         val mapName = getMapDisplayName(mapType)
         android.app.AlertDialog.Builder(context)
             .setTitle("未安装 $mapName")
             .setMessage(
-                "检测到当前未安装 $mapName（修改版）。\n\n" +
-                    "【重要限制】\n" +
-                    "官方原版高德/百度地图不支持悬浮导航功能。\n" +
-                    "必须安装民间修改版悬浮地图车机版才能实现悬浮叠加。\n\n" +
-                    "请在车机应用市场或社区论坛搜索 $mapName 修改版安装。"
+                "未检测到 $mapName。\n\n" +
+                    "支持以下版本：\n" +
+                    "• 修改版悬浮地图（推荐，支持悬浮叠加）\n" +
+                    "• 官方车机版地图（全屏运行，可快速切回）\n" +
+                    "• 手机版地图（全屏运行）\n\n" +
+                    "请在车机应用市场搜索安装 $mapName。"
             )
-            .setPositiveButton("知道了", null)
-            .show()
+            .setPositiveButton("知道了", null).show()
     }
 
     /**
-     * 检查并显示完整的权限状态（用于设置页展示）
-     *
-     * @param context 上下文
-     * @return 权限状态信息对象
+     * 检查完整权限状态
      */
     fun checkPermissionStatus(context: Context): PermissionStatus {
         val mapType = getSelectedMapType(context)
         val ownPermission = hasOwnOverlayPermission(context)
-        val mapPackage = findInstalledFloatingMap(context, mapType)
-        val mapInstalled = mapPackage != null
-        val mapPermission = if (mapPackage != null) {
-            hasAppOverlayPermission(context, mapPackage)
-        } else {
-            false
-        }
+        val mapResult = findInstalledMap(context, mapType)
+        val mapInstalled = mapResult != null
+        val mapPermission = if (mapResult != null) {
+            hasAppOverlayPermission(context, mapResult.packageName)
+        } else false
 
         return PermissionStatus(
             mapType = mapType,
             mapDisplayName = getMapDisplayName(mapType),
             ownOverlayPermission = ownPermission,
             mapInstalled = mapInstalled,
-            mapPackage = mapPackage,
+            mapPackage = mapResult?.packageName,
+            mapMode = mapResult?.mode,
             mapOverlayPermission = mapPermission,
             autoReturnEnabled = isAutoReturnEnabled(context),
-            ready = ownPermission && mapInstalled && mapPermission
+            floatingWidgetEnabled = isFloatingWidgetEnabled(context),
+            ready = ownPermission && mapInstalled
         )
     }
 
+    // ======================== 数据类 ========================
+
     /**
-     * 权限状态数据类
+     * 地图安装检测结果
+     *
+     * @param packageName 包名
+     * @param mode 模式：FLOATING（悬浮叠加）/ FULLSCREEN（全屏运行）
+     * @param mapType 地图类型
+     */
+    data class MapInstallResult(
+        val packageName: String,
+        val mode: MapMode,
+        val mapType: String
+    )
+
+    /**
+     * 导航模式
+     */
+    enum class MapMode {
+        /** 悬浮叠加模式：修改版地图支持悬浮窗，返回桌面后地图叠加显示 */
+        FLOATING,
+        /** 全屏模式：官方车机版/手机版，全屏运行，返回桌面后可快速切回 */
+        FULLSCREEN
+    }
+
+    /**
+     * 权限状态
      */
     data class PermissionStatus(
-        val mapType: String,            // 当前地图类型
-        val mapDisplayName: String,     // 地图显示名称
-        val ownOverlayPermission: Boolean,  // 桌面自身悬浮窗权限
-        val mapInstalled: Boolean,      // 修改版地图是否已安装
-        val mapPackage: String?,        // 已安装的地图包名
-        val mapOverlayPermission: Boolean,  // 地图APP悬浮窗权限
-        val autoReturnEnabled: Boolean, // 自动返回桌面开关
-        val ready: Boolean              // 是否全部就绪可启动
+        val mapType: String,
+        val mapDisplayName: String,
+        val ownOverlayPermission: Boolean,
+        val mapInstalled: Boolean,
+        val mapPackage: String?,
+        val mapMode: MapMode?,
+        val mapOverlayPermission: Boolean,
+        val autoReturnEnabled: Boolean,
+        val floatingWidgetEnabled: Boolean,
+        val ready: Boolean
     )
 }

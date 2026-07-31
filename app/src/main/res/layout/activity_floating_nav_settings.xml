@@ -76,7 +76,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
-                    android:text="• 官方原版高德/百度地图不支持悬浮导航\n• 必须使用民间修改版悬浮地图车机版\n• 系统深度清理后悬浮窗可能消失，需重新启动\n• 锁屏后悬浮窗可能被系统回收\n• 建议将 PandaDesk 和地图APP 加入后台白名单"
+                    android:text="• 官方原版高德/百度/腾讯地图不支持悬浮导航\n• 悬浮修改版支持悬浮叠加，官方车机版/手机版为全屏模式\n• 全屏模式下返回桌面后，可点击悬浮按钮快速切回地图\n• 系统深度清理后悬浮窗可能消失，需重新启动\n• 锁屏后悬浮窗可能被系统回收\n• 建议将 PandaDesk 和地图APP 加入后台白名单"
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_size_small"
                     android:lineSpacingExtra="4dp" />
@@ -242,6 +242,74 @@
                     <!-- 选中标记 -->
                     <ImageView
                         android:id="@+id/iv_baidu_check"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_check"
+                        android:visibility="invisible"
+                        android:contentDescription="已选择" />
+
+                </LinearLayout>
+
+                <!-- 腾讯地图选项 -->
+                <LinearLayout
+                    android:id="@+id/btn_select_tencent"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/spacing_md"
+                    android:paddingEnd="@dimen/spacing_md"
+                    android:background="@drawable/bg_map_btn"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_icon_purple" />
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_map_tencent"
+                            android:contentDescription="腾讯" />
+
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="腾讯地图"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_normal"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_tencent_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="未检测到"
+                            android:textColor="@color/accent_red"
+                            android:textSize="@dimen/text_size_micro" />
+
+                    </LinearLayout>
+
+                    <!-- 选中标记 -->
+                    <ImageView
+                        android:id="@+id/iv_tencent_check"
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:src="@drawable/ic_check"
@@ -445,6 +513,76 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- ==================== 悬浮状态按钮开关卡片 ==================== -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/card_margin"
+            android:layout_marginEnd="@dimen/card_margin"
+            android:layout_marginBottom="@dimen/spacing_md"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="@color/card_glass">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="@dimen/card_padding">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_icon_orange" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_navigation"
+                        android:contentDescription="悬浮状态" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="导航悬浮状态按钮"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/text_size_normal" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="返回桌面后显示悬浮按钮，点击快速切回地图"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_size_micro" />
+
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/switch_floating_widget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:thumbTint="@color/primary"
+                    android:trackTint="@color/surface_light" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <!-- ==================== Windlink 适配说明卡片 ==================== -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -474,7 +612,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
-                    android:text="• Windlink 后台策略可能杀死桌面或地图进程，请将两者加入后台白名单\n• 系统深度清理后悬浮窗会消失，需重新启动导航\n• 锁屏后悬浮窗可能被回收，解锁后需重新启动\n• 如地图无法悬浮，请检查地图APP自身的悬浮窗权限\n• 本功能不使用任何系统签名、root、注入技术"
+                    android:text="• Windlink 后台策略可能杀死桌面或地图进程，请将两者加入后台白名单\n• 系统深度清理后悬浮窗会消失，需重新启动导航\n• 锁屏后悬浮窗可能被回收，解锁后需重新启动\n• 悬浮修改版地图：返回桌面后地图叠加显示\n• 官方车机版/手机版地图：返回桌面后可点击悬浮按钮切回\n• 本功能不使用任何系统签名、root、注入技术"
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_size_small"
                     android:lineSpacingExtra="4dp" />
