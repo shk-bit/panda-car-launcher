@@ -265,6 +265,17 @@
                     android:background="@color/text_hint"
                     android:layout_marginStart="68dp" />
 
+                <!-- 悬浮导航设置 -->
+                <include
+                    android:id="@+id/item_floating_nav"
+                    layout="@layout/item_setting" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="@color/text_hint"
+                    android:layout_marginStart="68dp" />
+
                 <!-- 视频播放器 -->
                 <include
                     android:id="@+id/item_video_player"

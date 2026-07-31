@@ -124,6 +124,24 @@ class MainActivity : AppCompatActivity() {
         setupBottomAppsRecyclerView()
         // 刷新壁纸
         applyWallpaper()
+        // 刷新导航地图类型显示
+        updateNavSwitchText()
+    }
+
+    /**
+     * 更新导航切换按钮的文字
+     * 显示当前选中的悬浮地图类型
+     */
+    private fun updateNavSwitchText() {
+        val mapType = FloatingNavManager.getSelectedMapType(this)
+        val mapName = FloatingNavManager.getMapDisplayName(mapType)
+        val mapPkg = FloatingNavManager.findInstalledFloatingMap(this, mapType)
+        val displayText = if (mapPkg != null) {
+            "$mapName ▼"
+        } else {
+            "$mapName (未安装) ▼"
+        }
+        findViewById<TextView>(R.id.nav_switch)?.text = displayText
     }
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
@@ -347,21 +365,21 @@ class MainActivity : AppCompatActivity() {
      * 设置导航和音乐按钮点击事件
      */
     private fun setupNavButtons() {
-        // 导航切换（占位页上的）
+        // 导航切换（占位页上的）→ 跳转悬浮导航设置页
         findViewById<TextView>(R.id.nav_switch)?.setOnClickListener {
-            showNavSwitchDialog()
+            startActivity(Intent(this, FloatingNavSettingsActivity::class.java))
         }
-        // 导航切换（SDK 工具栏上的）
+        // 导航切换（SDK 工具栏上的）→ 跳转悬浮导航设置页
         findViewById<TextView>(R.id.nav_switch2)?.setOnClickListener {
-            showNavSwitchDialog()
+            startActivity(Intent(this, FloatingNavSettingsActivity::class.java))
         }
         // 关闭导航 SDK
         findViewById<ImageView>(R.id.nav_close)?.setOnClickListener {
             closeEmbeddedNav()
         }
-        // 点击导航卡片/占位页 -> 启动嵌入式导航
+        // 点击导航卡片/占位页 -> 启动悬浮导航
         findViewById<View>(R.id.nav_placeholder)?.setOnClickListener {
-            launchEmbeddedNav()
+            FloatingNavManager.launchFloatingNav(this)
         }
         // 音乐控制
         findViewById<ImageView>(R.id.music_prev)?.setOnClickListener {
@@ -1204,10 +1222,15 @@ class MainActivity : AppCompatActivity() {
     private var embeddedNavPkg: String? = null
 
     /**
-     * 打开导航（底部导航栏按钮）- 嵌入式
+     * 打开导航（底部导航栏按钮）- 悬浮窗叠加方案
+     *
+     * 使用 FloatingNavManager 启动悬浮导航：
+     * 1. 检查桌面 + 地图APP悬浮窗权限
+     * 2. 拉起修改版悬浮地图APP
+     * 3. 延时后自动切回桌面，使地图悬浮窗叠加在桌面上层
      */
     private fun openNavigation() {
-        launchEmbeddedNav()
+        FloatingNavManager.launchFloatingNav(this)
     }
 
     /**

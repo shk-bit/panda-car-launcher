@@ -124,6 +124,17 @@ class SettingsActivity : AppCompatActivity() {
             "自定义悬浮球样式和功能"
         )
 
+        // 悬浮导航设置
+        findViewById<View>(R.id.item_floating_nav)?.setOnClickListener {
+            startActivity(Intent(this, FloatingNavSettingsActivity::class.java))
+        }
+        bindSettingItem(
+            R.id.item_floating_nav,
+            R.drawable.ic_navigation,
+            "悬浮导航设置",
+            "悬浮地图选择、权限检测、自动返回"
+        )
+
         // 视频播放器
         findViewById<View>(R.id.item_video_player)?.setOnClickListener {
             // 打开文件选择器

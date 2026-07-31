@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    悬浮导航设置页面布局
+    Dracula 深色主题 | 横屏车机布局 | 大触控控件
+
+    适配设备：东风风神AX7马赫版 Windlink车机
+    设计基准：1200x1920 横屏，大字号，高对比度
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- ==================== 顶部标题栏 ==================== -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_back"
+                android:padding="8dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="返回" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/btn_back"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:text="悬浮导航设置"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_large"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+        <!-- ==================== 重要提示卡片 ==================== -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/card_margin"
+            android:layout_marginEnd="@dimen/card_margin"
+            android:layout_marginBottom="@dimen/spacing_md"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="#E6333333">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/card_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚠ 重要限制说明"
+                    android:textColor="@color/accent_orange"
+                    android:textSize="@dimen/text_size_normal"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="• 官方原版高德/百度地图不支持悬浮导航\n• 必须使用民间修改版悬浮地图车机版\n• 系统深度清理后悬浮窗可能消失，需重新启动\n• 锁屏后悬浮窗可能被系统回收\n• 建议将 PandaDesk 和地图APP 加入后台白名单"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_size_small"
+                    android:lineSpacingExtra="4dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- ==================== 地图选择卡片 ==================== -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/card_margin"
+            android:layout_marginEnd="@dimen/card_margin"
+            android:layout_marginBottom="@dimen/spacing_md"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="@color/card_glass">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/card_padding">
+
+                <!-- 标题 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="选择悬浮地图"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/text_size_normal"
+                    android:textStyle="bold"
+                    android:drawableStart="@drawable/ic_navigation"
+                    android:drawablePadding="@dimen/spacing_sm"
+                    android:gravity="center_vertical" />
+
+                <!-- 高德地图选项 -->
+                <LinearLayout
+                    android:id="@+id/btn_select_amap"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/spacing_md"
+                    android:paddingEnd="@dimen/spacing_md"
+                    android:background="@drawable/bg_map_btn"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_icon_green" />
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_map_amap"
+                            android:contentDescription="高德" />
+
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="悬浮高德地图"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_normal"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_amap_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="未检测到"
+                            android:textColor="@color/accent_red"
+                            android:textSize="@dimen/text_size_micro" />
+
+                    </LinearLayout>
+
+                    <!-- 选中标记 -->
+                    <ImageView
+                        android:id="@+id/iv_amap_check"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_check"
+                        android:visibility="invisible"
+                        android:contentDescription="已选择" />
+
+                </LinearLayout>
+
+                <!-- 百度地图选项 -->
+                <LinearLayout
+                    android:id="@+id/btn_select_baidu"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/spacing_md"
+                    android:paddingEnd="@dimen/spacing_md"
+                    android:background="@drawable/bg_map_btn"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_icon_blue" />
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_map_baidu"
+                            android:contentDescription="百度" />
+
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="悬浮百度地图"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_normal"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_baidu_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="未检测到"
+                            android:textColor="@color/accent_red"
+                            android:textSize="@dimen/text_size_micro" />
+
+                    </LinearLayout>
+
+                    <!-- 选中标记 -->
+                    <ImageView
+                        android:id="@+id/iv_baidu_check"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_check"
+                        android:visibility="invisible"
+                        android:contentDescription="已选择" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- ==================== 权限检测卡片 ==================== -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/card_margin"
+            android:layout_marginEnd="@dimen/card_margin"
+            android:layout_marginBottom="@dimen/spacing_md"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="@color/card_glass">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/card_padding">
+
+                <!-- 标题 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="权限检测"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/text_size_normal"
+                    android:textStyle="bold"
+                    android:drawableStart="@drawable/ic_settings"
+                    android:drawablePadding="@dimen/spacing_sm"
+                    android:gravity="center_vertical" />
+
+                <!-- 桌面悬浮窗权限状态 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="桌面悬浮窗权限"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_size_medium" />
+
+                    <TextView
+                        android:id="@+id/tv_own_permission_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="未授权"
+                        android:textColor="@color/accent_red"
+                        android:textSize="@dimen/text_size_medium"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_own_permission"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:minWidth="100dp"
+                        android:text="去授权"
+                        android:textSize="@dimen/text_size_small"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/bg_button_primary" />
+
+                </LinearLayout>
+
+                <!-- 地图APP悬浮窗权限状态 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="地图APP悬浮窗权限"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_size_medium" />
+
+                    <TextView
+                        android:id="@+id/tv_map_permission_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="未检测到"
+                        android:textColor="@color/accent_red"
+                        android:textSize="@dimen/text_size_medium"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_map_permission"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:minWidth="100dp"
+                        android:text="去授权"
+                        android:textSize="@dimen/text_size_small"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/bg_button_primary"
+                        android:enabled="false" />
+
+                </LinearLayout>
+
+                <!-- 重新检测按钮 -->
+                <Button
+                    android:id="@+id/btn_recheck"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="重新检测权限"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textColor="@color/text_primary"
+                    android:background="@drawable/bg_button_secondary" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- ==================== 自动返回开关卡片 ==================== -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/card_margin"
+            android:layout_marginEnd="@dimen/card_margin"
+            android:layout_marginBottom="@dimen/spacing_md"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="@color/card_glass">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="@dimen/card_padding">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_icon_cyan" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_home"
+                        android:contentDescription="自动返回" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="启动导航自动返回桌面"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/text_size_normal" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="启动地图后自动切回桌面，使地图悬浮窗叠加"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_size_micro" />
+
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/switch_auto_return"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:thumbTint="@color/primary"
+                    android:trackTint="@color/surface_light" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- ==================== Windlink 适配说明卡片 ==================== -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/card_margin"
+            android:layout_marginEnd="@dimen/card_margin"
+            android:layout_marginBottom="@dimen/spacing_md"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="@color/card_glass">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/card_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Windlink 车机适配说明"
+                    android:textColor="@color/primary"
+                    android:textSize="@dimen/text_size_normal"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="• Windlink 后台策略可能杀死桌面或地图进程，请将两者加入后台白名单\n• 系统深度清理后悬浮窗会消失，需重新启动导航\n• 锁屏后悬浮窗可能被回收，解锁后需重新启动\n• 如地图无法悬浮，请检查地图APP自身的悬浮窗权限\n• 本功能不使用任何系统签名、root、注入技术"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_size_small"
+                    android:lineSpacingExtra="4dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- ==================== 底部留白 ==================== -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/spacing_lg" />
+
+    </LinearLayout>
+
+</ScrollView>

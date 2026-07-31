@@ -16,6 +16,21 @@
         <package android:name="com.netease.cloudmusic" />
         <package android:name="com.spotify.music" />
         <package android:name="com.apple.android.music" />
+
+        <!-- 悬浮高德地图修改版包名（用于检测安装状态） -->
+        <package android:name="com.autonavi.amapauto.floating" />
+        <package android:name="com.autonavi.amapauto.overlay" />
+        <package android:name="com.autonavi.amapauto.chenmo" />
+        <package android:name="com.autonavi.amapauto.u3d" />
+        <package android:name="com.autonavi.amapauto.superv" />
+        <package android:name="com.autonavi.amapauto.xf" />
+
+        <!-- 悬浮百度地图修改版包名（用于检测安装状态） -->
+        <package android:name="com.baidu.naviauto.floating" />
+        <package android:name="com.baidu.naviauto.overlay" />
+        <package android:name="com.baidu.naviauto.superv" />
+        <package android:name="com.baidu.naviauto.xf" />
+        <package android:name="com.baidu.BaiduMap.floating" />
     </queries>
 
     <!-- 网络权限 -->
@@ -131,6 +146,12 @@
         <!-- 悬浮球设置 -->
         <activity
             android:name=".FloatingBallSettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PandaCarLauncher" />
+
+        <!-- 悬浮导航设置 -->
+        <activity
+            android:name=".FloatingNavSettingsActivity"
             android:exported="false"
             android:theme="@style/Theme.PandaCarLauncher" />
 
