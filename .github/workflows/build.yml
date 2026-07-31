@@ -53,7 +53,7 @@ jobs:
         mkdir -p signing
         printf '%s' "$PEM" > signing/platform.pem
         printf '%s' "$X509" > signing/platform.x509.pem
-        printf '%s' "$PK8" > signing/platform.pk8
+        echo "$PK8" | base64 -d > signing/platform.pk8
         chmod 600 signing/platform.pem signing/platform.pk8
         BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
         APKSIGNER="${BUILD_TOOLS}apksigner"
