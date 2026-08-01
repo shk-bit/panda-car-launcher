@@ -171,21 +171,25 @@ class MainActivity : AppCompatActivity() {
     /**
      * 根据 ScreenOrientation 调用 AutoSize 适配
      *
-     * 设计基准 1200×1920（竖屏）：
-     *   - 竖屏：designWidth=1200, designHeight=1920（原始）
-     *   - 横屏：designWidth=1920, designHeight=1200（交换）
+     * 设计基准使用标准设备尺寸：
+     *   - 竖屏：designWidth=360（标准手机宽度）
+     *   - 横屏：designWidth=960（标准平板/车机宽度）
      *
-     * 这样横屏时 AutoSize 以宽度 1920 为基准缩放，
-     * 元素不会因宽度变大而被过度放大，避免比例失调。
+     * 这样 density 计算结果与原生 Android 一致，
+     * 字体和图标不会因基准过大而被压缩。
+     *
+     * 对比（1080px 手机竖屏）：
+     *   旧基准 1200dp → density=0.9 → 18sp=16px（太小）
+     *   新基准 360dp  → density=3.0 → 18sp=54px（正常）
      */
     private fun adaptAutoSizeForOrientation() {
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (isLandscape) {
-            // 横屏：以 1920 宽度为基准
-            AutoSize.autoConvertDensity(this, 1920f, true)
+            // 横屏：以 960 宽度为基准（标准平板/车机）
+            AutoSize.autoConvertDensity(this, 960f, true)
         } else {
-            // 竖屏：以 1200 宽度为基准
-            AutoSize.autoConvertDensity(this, 1200f, true)
+            // 竖屏：以 360 宽度为基准（标准手机）
+            AutoSize.autoConvertDensity(this, 360f, true)
         }
     }
 
@@ -375,13 +379,14 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 调整底部导航栏图标大小
-     * 使用原始像素值绕过AutoSize适配，确保在不同屏幕上显示一致
+     * 根据屏幕方向使用不同尺寸，确保车机和手机都可读
      */
     private fun adjustBottomNavIconSize() {
-        // 获取屏幕密度
         val density = resources.displayMetrics.density
-        // 固定图标大小为 28dp 对应的像素值（不经过AutoSize转换）
-        val iconSizePx = (28 * density).toInt()
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        // 横屏(车机): 32dp, 竖屏(手机): 28dp
+        val iconDp = if (isLandscape) 32 else 28
+        val iconSizePx = (iconDp * density).toInt()
 
         // 主页图标
         findViewById<LinearLayout>(R.id.nav_home)?.findViewById<ImageView>(android.R.id.content)?.let { }
