@@ -22,7 +22,7 @@
             android:layout_height="@dimen/app_icon_size"
             android:src="@drawable/ic_apps"
             android:background="@drawable/bg_icon_blue"
-            android:padding="16dp" />
+            android:padding="@dimen/spacing_md" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
             android:layout_height="@dimen/app_icon_size"
             android:src="@drawable/ic_settings"
             android:background="@drawable/bg_icon_orange"
-            android:padding="16dp" />
+            android:padding="@dimen/spacing_md" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -74,7 +74,7 @@
             android:layout_height="@dimen/app_icon_size"
             android:src="@drawable/ic_music"
             android:background="@drawable/bg_icon_cyan"
-            android:padding="16dp" />
+            android:padding="@dimen/spacing_md" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -100,7 +100,7 @@
             android:layout_height="@dimen/app_icon_size"
             android:src="@drawable/ic_music"
             android:background="@drawable/bg_icon_orange"
-            android:padding="16dp" />
+            android:padding="@dimen/spacing_md" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -126,7 +126,7 @@
             android:layout_height="@dimen/app_icon_size"
             android:src="@drawable/ic_apps"
             android:background="@drawable/bg_icon_green"
-            android:padding="16dp" />
+            android:padding="@dimen/spacing_md" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -152,7 +152,7 @@
             android:layout_height="@dimen/app_icon_size"
             android:src="@drawable/ic_car"
             android:background="@drawable/bg_icon_blue"
-            android:padding="16dp" />
+            android:padding="@dimen/spacing_md" />
 
         <TextView
             android:layout_width="wrap_content"

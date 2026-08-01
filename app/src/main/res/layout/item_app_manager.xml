@@ -5,14 +5,14 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:padding="@dimen/spacing_sm"
-    android:layout_marginBottom="1dp"
+    android:layout_marginBottom="@dimen/spacing_xs"
     android:background="@drawable/bg_card">
 
     <!-- 应用图标 -->
     <ImageView
         android:id="@+id/iv_app_icon"
-        android:layout_width="@dimen/app_icon_size"
-        android:layout_height="@dimen/app_icon_size"
+        android:layout_width="@dimen/list_item_icon_size"
+        android:layout_height="@dimen/list_item_icon_size"
         android:src="@drawable/ic_apps"
         android:scaleType="fitCenter" />
 
@@ -53,8 +53,8 @@
             android:textColor="@color/primary"
             android:textSize="@dimen/text_size_micro"
             android:background="@drawable/bg_icon_cyan"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
+            android:paddingStart="@dimen/spacing_xs"
+            android:paddingEnd="@dimen/spacing_xs"
             android:paddingTop="1dp"
             android:paddingBottom="1dp"
             android:visibility="gone" />
@@ -64,21 +64,21 @@
     <!-- 添加到桌面按钮 -->
     <ImageView
         android:id="@+id/btn_add_to_desktop"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="@dimen/list_btn_size"
+        android:layout_height="@dimen/list_btn_size"
         android:src="@drawable/ic_add"
-        android:padding="6dp"
+        android:padding="@dimen/spacing_xs"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="添加到桌面" />
 
     <!-- 卸载按钮 -->
     <ImageView
         android:id="@+id/btn_uninstall"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="@dimen/list_btn_size"
+        android:layout_height="@dimen/list_btn_size"
         android:layout_marginStart="@dimen/spacing_sm"
         android:src="@drawable/ic_delete"
-        android:padding="6dp"
+        android:padding="@dimen/spacing_xs"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="卸载" />
 

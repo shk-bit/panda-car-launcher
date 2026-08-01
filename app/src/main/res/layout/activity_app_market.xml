@@ -8,17 +8,17 @@
     <!-- 顶部标题栏 -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:layout_height="@dimen/title_bar_height"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md">
 
         <ImageView
             android:id="@+id/btn_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/title_bar_back_size"
+            android:layout_height="@dimen/title_bar_back_size"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_back"
-            android:padding="8dp"
+            android:padding="@dimen/title_bar_back_padding"
             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
         <TextView
@@ -26,21 +26,21 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/btn_back"
             android:layout_centerVertical="true"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="应用市场"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
 
         <!-- 刷新按钮 -->
         <ImageView
             android:id="@+id/btn_refresh"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/title_bar_back_size"
+            android:layout_height="@dimen/title_bar_back_size"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_refresh"
-            android:padding="8dp"
+            android:padding="@dimen/title_bar_back_padding"
             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
     </RelativeLayout>
@@ -50,8 +50,8 @@
         android:id="@+id/et_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:padding="12dp"
+        android:layout_margin="@dimen/spacing_md"
+        android:padding="@dimen/spacing_sm"
         android:background="@drawable/bg_edittext"
         android:hint="搜索应用"
         android:textColorHint="@color/text_hint"
@@ -64,8 +64,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp" />
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginEnd="@dimen/spacing_md" />
 
     <!-- 加载进度 -->
     <ProgressBar

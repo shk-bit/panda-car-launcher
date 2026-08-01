@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="@dimen/dialog_item_height"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="?android:attr/selectableItemBackground"
-    android:padding="8dp">
+    android:padding="@dimen/spacing_sm">
 
     <ImageView
         android:id="@+id/app_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp" />
+        android:layout_width="@dimen/dialog_item_icon_size"
+        android:layout_height="@dimen/dialog_item_icon_size" />
 
     <TextView
         android:id="@+id/app_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="@dimen/spacing_sm"
         android:textColor="#FFFFFF"
-        android:textSize="14sp" />
+        android:textSize="@dimen/text_size_small" />
 
     <ImageView
         android:id="@+id/app_check"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/icon_inner_size"
+        android:layout_height="@dimen/icon_inner_size"
         android:src="@drawable/ic_check"
         android:tint="#00CED1"
         android:visibility="gone" />

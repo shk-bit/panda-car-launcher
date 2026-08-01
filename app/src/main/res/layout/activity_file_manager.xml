@@ -8,17 +8,17 @@
     <!-- 顶部标题栏 -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:layout_height="@dimen/title_bar_height"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md">
 
         <ImageView
             android:id="@+id/btn_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/title_bar_back_size"
+            android:layout_height="@dimen/title_bar_back_size"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_back"
-            android:padding="8dp"
+            android:padding="@dimen/title_bar_back_padding"
             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
         <TextView
@@ -27,10 +27,10 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/btn_back"
             android:layout_centerVertical="true"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="/storage"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_size_medium"
             android:maxLines="1"
             android:ellipsize="middle" />
 
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:padding="@dimen/spacing_sm"
         android:gravity="center">
 
         <Button
@@ -58,7 +58,7 @@
             android:text="排序"
             android:textColor="@color/text_primary"
             android:background="@drawable/bg_button_secondary"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="@dimen/spacing_sm" />
 
         <Button
             android:id="@+id/btn_refresh"

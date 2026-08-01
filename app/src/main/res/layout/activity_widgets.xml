@@ -8,17 +8,17 @@
     <!-- 顶部标题栏 -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:layout_height="@dimen/title_bar_height"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md">
 
         <ImageView
             android:id="@+id/btn_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/title_bar_back_size"
+            android:layout_height="@dimen/title_bar_back_size"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_back"
-            android:padding="8dp"
+            android:padding="@dimen/title_bar_back_padding"
             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
         <TextView
@@ -26,10 +26,10 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/btn_back"
             android:layout_centerVertical="true"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="小组件"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
 
     </RelativeLayout>
@@ -42,15 +42,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="@dimen/spacing_md">
 
             <!-- 时钟组件 -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                android:layout_marginBottom="@dimen/spacing_md"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
                 app:cardBackgroundColor="@color/card_glass"
                 xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -58,7 +58,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp"
+                    android:padding="@dimen/dialog_padding"
                     android:gravity="center">
 
                     <TextView
@@ -74,10 +74,10 @@
                         android:id="@+id/tv_clock_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/spacing_sm"
                         android:text="2024年1月1日 星期一"
                         android:textColor="@color/text_secondary"
-                        android:textSize="16sp" />
+                        android:textSize="@dimen/text_size_medium" />
 
                 </LinearLayout>
 
@@ -87,9 +87,9 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                android:layout_marginBottom="@dimen/spacing_md"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
                 app:cardBackgroundColor="@color/card_glass"
                 xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -97,7 +97,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/dialog_padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -107,15 +107,15 @@
 
                         <ImageView
                             android:id="@+id/iv_weather_icon"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            android:layout_width="@dimen/list_item_icon_size"
+                            android:layout_height="@dimen/list_item_icon_size"
                             android:src="@drawable/ic_weather_sunny" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/spacing_md"
                             android:orientation="vertical">
 
                             <TextView
@@ -124,7 +124,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="25°C"
                                 android:textColor="@color/text_primary"
-                                android:textSize="32sp"
+                                android:textSize="@dimen/text_size_title"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -133,7 +133,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="晴"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="16sp" />
+                                android:textSize="@dimen/text_size_medium" />
 
                         </LinearLayout>
 
@@ -143,14 +143,14 @@
                             android:layout_height="wrap_content"
                             android:text="北京"
                             android:textColor="@color/text_secondary"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/text_size_small" />
 
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="@dimen/spacing_md"
                         android:orientation="horizontal">
 
                         <TextView
@@ -160,7 +160,7 @@
                             android:layout_weight="1"
                             android:text="湿度: 60%"
                             android:textColor="@color/text_secondary"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/text_size_small" />
 
                         <TextView
                             android:id="@+id/tv_weather_wind"
@@ -169,7 +169,7 @@
                             android:layout_weight="1"
                             android:text="风速: 3m/s"
                             android:textColor="@color/text_secondary"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/text_size_small" />
 
                     </LinearLayout>
 
@@ -181,8 +181,8 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
                 app:cardBackgroundColor="@color/card_glass"
                 xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -190,7 +190,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/dialog_padding">
 
                     <TextView
                         android:id="@+id/tv_calendar_month"
@@ -198,14 +198,14 @@
                         android:layout_height="wrap_content"
                         android:text="2024年1月"
                         android:textColor="@color/text_primary"
-                        android:textSize="18sp"
+                        android:textSize="@dimen/text_size_normal"
                         android:textStyle="bold" />
 
                     <CalendarView
                         android:id="@+id/calendar_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp" />
+                        android:layout_marginTop="@dimen/spacing_sm" />
 
                 </LinearLayout>
 

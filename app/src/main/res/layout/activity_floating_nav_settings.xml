@@ -21,17 +21,17 @@
         <!-- ==================== 顶部标题栏 ==================== -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="@dimen/title_bar_height"
             android:paddingStart="@dimen/spacing_md"
             android:paddingEnd="@dimen/spacing_md"
             android:gravity="center_vertical">
 
             <ImageView
                 android:id="@+id/btn_back"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/title_bar_back_size"
+                android:layout_height="@dimen/title_bar_back_size"
                 android:src="@drawable/ic_back"
-                android:padding="8dp"
+                android:padding="@dimen/title_bar_back_padding"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="返回" />
 
@@ -79,7 +79,7 @@
                     android:text="• 官方原版高德/百度/腾讯地图不支持悬浮导航\n• 悬浮修改版支持悬浮叠加，官方车机版/手机版为全屏模式\n• 全屏模式下返回桌面后，可点击悬浮按钮快速切回地图\n• 系统深度清理后悬浮窗可能消失，需重新启动\n• 锁屏后悬浮窗可能被系统回收\n• 建议将 PandaDesk 和地图APP 加入后台白名单"
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_size_small"
-                    android:lineSpacingExtra="4dp" />
+                    android:lineSpacingExtra="@dimen/spacing_xs" />
 
             </LinearLayout>
 
@@ -118,7 +118,7 @@
                 <LinearLayout
                     android:id="@+id/btn_select_amap"
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
+                    android:layout_height="@dimen/list_item_height"
                     android:layout_marginTop="@dimen/spacing_md"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
@@ -129,8 +129,8 @@
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp">
+                        android:layout_width="@dimen/list_item_icon_size"
+                        android:layout_height="@dimen/list_item_icon_size">
 
                         <View
                             android:layout_width="match_parent"
@@ -138,8 +138,8 @@
                             android:background="@drawable/bg_icon_green" />
 
                         <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="@dimen/bottom_nav_icon_size"
+                            android:layout_height="@dimen/bottom_nav_icon_size"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_map_amap"
                             android:contentDescription="高德" />
@@ -186,7 +186,7 @@
                 <LinearLayout
                     android:id="@+id/btn_select_baidu"
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
+                    android:layout_height="@dimen/list_item_height"
                     android:layout_marginTop="@dimen/spacing_sm"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
@@ -197,8 +197,8 @@
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp">
+                        android:layout_width="@dimen/list_item_icon_size"
+                        android:layout_height="@dimen/list_item_icon_size">
 
                         <View
                             android:layout_width="match_parent"
@@ -206,8 +206,8 @@
                             android:background="@drawable/bg_icon_blue" />
 
                         <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="@dimen/bottom_nav_icon_size"
+                            android:layout_height="@dimen/bottom_nav_icon_size"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_map_baidu"
                             android:contentDescription="百度" />
@@ -254,7 +254,7 @@
                 <LinearLayout
                     android:id="@+id/btn_select_tencent"
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
+                    android:layout_height="@dimen/list_item_height"
                     android:layout_marginTop="@dimen/spacing_sm"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
@@ -265,8 +265,8 @@
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp">
+                        android:layout_width="@dimen/list_item_icon_size"
+                        android:layout_height="@dimen/list_item_icon_size">
 
                         <View
                             android:layout_width="match_parent"
@@ -274,8 +274,8 @@
                             android:background="@drawable/bg_icon_purple" />
 
                         <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="@dimen/bottom_nav_icon_size"
+                            android:layout_height="@dimen/bottom_nav_icon_size"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_map_tencent"
                             android:contentDescription="腾讯" />
@@ -379,7 +379,7 @@
                     <Button
                         android:id="@+id/btn_own_permission"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
+                        android:layout_height="@dimen/button_height"
                         android:layout_marginStart="@dimen/spacing_sm"
                         android:minWidth="100dp"
                         android:text="去授权"
@@ -417,7 +417,7 @@
                     <Button
                         android:id="@+id/btn_map_permission"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
+                        android:layout_height="@dimen/button_height"
                         android:layout_marginStart="@dimen/spacing_sm"
                         android:minWidth="100dp"
                         android:text="去授权"
@@ -432,7 +432,7 @@
                 <Button
                     android:id="@+id/btn_recheck"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="@dimen/button_height"
                     android:layout_marginTop="@dimen/spacing_md"
                     android:text="重新检测权限"
                     android:textSize="@dimen/text_size_medium"
@@ -462,8 +462,8 @@
                 android:padding="@dimen/card_padding">
 
                 <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp">
+                    android:layout_width="@dimen/icon_bg_size"
+                    android:layout_height="@dimen/icon_bg_size">
 
                     <View
                         android:layout_width="match_parent"
@@ -471,8 +471,8 @@
                         android:background="@drawable/bg_icon_cyan" />
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="@dimen/icon_inner_size"
+                        android:layout_height="@dimen/icon_inner_size"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_home"
                         android:contentDescription="自动返回" />
@@ -532,8 +532,8 @@
                 android:padding="@dimen/card_padding">
 
                 <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp">
+                    android:layout_width="@dimen/icon_bg_size"
+                    android:layout_height="@dimen/icon_bg_size">
 
                     <View
                         android:layout_width="match_parent"
@@ -541,8 +541,8 @@
                         android:background="@drawable/bg_icon_orange" />
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="@dimen/icon_inner_size"
+                        android:layout_height="@dimen/icon_inner_size"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_navigation"
                         android:contentDescription="悬浮状态" />
@@ -615,7 +615,7 @@
                     android:text="• Windlink 后台策略可能杀死桌面或地图进程，请将两者加入后台白名单\n• 系统深度清理后悬浮窗会消失，需重新启动导航\n• 锁屏后悬浮窗可能被回收，解锁后需重新启动\n• 悬浮修改版地图：返回桌面后地图叠加显示\n• 官方车机版/手机版地图：返回桌面后可点击悬浮按钮切回\n• 本功能不使用任何系统签名、root、注入技术"
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_size_small"
-                    android:lineSpacingExtra="4dp" />
+                    android:lineSpacingExtra="@dimen/spacing_xs" />
 
             </LinearLayout>
 

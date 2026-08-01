@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="8dp"
+    android:padding="@dimen/spacing_sm"
     android:background="?android:attr/selectableItemBackgroundBorderless">
 
     <!-- 应用图标卡片 -->
@@ -12,12 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_card_white"
-        android:padding="16dp">
+        android:padding="@dimen/spacing_md">
 
         <ImageView
             android:id="@+id/iv_app_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/list_item_icon_size"
+            android:layout_height="@dimen/list_item_icon_size"
             android:layout_gravity="center"
             android:scaleType="fitCenter" />
 
@@ -28,7 +28,7 @@
         android:id="@+id/tv_app_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/spacing_sm"
         android:textColor="@color/text_primary"
         android:textSize="@dimen/text_size_small"
         android:maxLines="1"

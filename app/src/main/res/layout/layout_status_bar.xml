@@ -11,16 +11,16 @@
     <!-- 左侧：用户头像 -->
     <ImageView
         android:id="@+id/iv_user"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="@dimen/list_item_icon_size"
+        android:layout_height="@dimen/list_item_icon_size"
         android:src="@drawable/ic_user"
         android:background="@drawable/bg_icon_cyan"
-        android:padding="6dp" />
+        android:padding="@dimen/spacing_xs" />
 
     <!-- 左侧：WiFi信号 -->
     <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/icon_inner_size"
+        android:layout_height="@dimen/icon_inner_size"
         android:layout_marginStart="@dimen/spacing_md"
         android:src="@drawable/ic_navigation"
         android:alpha="0.7" />

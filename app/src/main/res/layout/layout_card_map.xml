@@ -30,17 +30,17 @@
 
             <ImageView
                 android:id="@+id/btn_float_map"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="@dimen/bottom_nav_icon_size"
+                android:layout_height="@dimen/bottom_nav_icon_size"
                 android:src="@drawable/ic_floating"
-                android:padding="2dp"
+                android:padding="@dimen/spacing_xs"
                 android:background="?android:attr/selectableItemBackgroundBorderless" />
 
             <ImageView
                 android:id="@+id/btn_close"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="8dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
+                android:layout_marginStart="@dimen/spacing_sm"
                 android:src="@drawable/ic_navigation"
                 android:alpha="0.5" />
 
@@ -97,8 +97,8 @@
                 android:paddingBottom="@dimen/spacing_sm">
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/search_icon_size"
+                    android:layout_height="@dimen/search_icon_size"
                     android:src="@drawable/ic_navigation" />
 
                 <TextView
@@ -116,8 +116,8 @@
         <!-- 右侧图标 -->
         <ImageView
             android:id="@+id/iv_map_icon"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/app_icon_size"
+            android:layout_height="@dimen/app_icon_size"
             android:src="@drawable/ic_navigation"
             android:alpha="0.8" />
 

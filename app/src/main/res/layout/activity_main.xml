@@ -31,7 +31,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="@dimen/spacing_md">
 
             <!-- 上半部分：导航卡片 - SDK导航控件容器 -->
             <FrameLayout
@@ -39,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="3"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="@dimen/spacing_sm"
                 android:background="@drawable/bg_plugin_card"
                 android:clipToOutline="true">
 
@@ -49,7 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="20dp"
+                    android:padding="@dimen/spacing_md"
                     android:gravity="center">
 
                     <!-- 导航标题栏 -->
@@ -60,8 +60,8 @@
                         android:gravity="center_vertical">
 
                         <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
+                            android:layout_width="@dimen/list_item_icon_size"
+                            android:layout_height="@dimen/list_item_icon_size"
                             android:src="@drawable/ic_navigation"
                             android:tint="#00CED1" />
 
@@ -69,10 +69,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="12dp"
+                            android:layout_marginStart="@dimen/spacing_sm"
                             android:text="导航"
                             android:textColor="#FFFFFF"
-                            android:textSize="18sp"
+                            android:textSize="@dimen/text_size_normal"
                             android:textStyle="bold" />
 
                         <TextView
@@ -81,7 +81,7 @@
                             android:layout_height="wrap_content"
                             android:text="高德 ▼"
                             android:textColor="#00CED1"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/text_size_small" />
 
                     </LinearLayout>
 
@@ -94,8 +94,8 @@
                         android:gravity="center">
 
                         <ImageView
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
+                            android:layout_width="@dimen/app_icon_size"
+                            android:layout_height="@dimen/app_icon_size"
                             android:src="@drawable/ic_navigation"
                             android:tint="#4000CED1" />
 
@@ -106,7 +106,7 @@
                             android:layout_marginTop="16dp"
                             android:text="点击启动导航"
                             android:textColor="#B0FFFFFF"
-                            android:textSize="16sp" />
+                            android:textSize="@dimen/text_size_medium" />
 
                     </LinearLayout>
 
@@ -133,8 +133,8 @@
                         android:paddingBottom="8dp">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="@dimen/icon_inner_size"
+                            android:layout_height="@dimen/icon_inner_size"
                             android:src="@drawable/ic_navigation"
                             android:tint="#00CED1" />
 
@@ -143,10 +143,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/spacing_sm"
                             android:text="高德地图"
                             android:textColor="#FFFFFF"
-                            android:textSize="14sp"
+                            android:textSize="@dimen/text_size_small"
                             android:textStyle="bold" />
 
                         <TextView
@@ -156,15 +156,15 @@
                             android:text="切换"
                             android:textColor="#00CED1"
                             android:textSize="13sp"
-                            android:padding="4dp"
+                            android:padding="@dimen/spacing_xs"
                             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
                         <ImageView
                             android:id="@+id/nav_close"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="@dimen/bottom_nav_icon_size"
+                            android:layout_height="@dimen/bottom_nav_icon_size"
                             android:src="@drawable/ic_close"
-                            android:padding="4dp"
+                            android:padding="@dimen/spacing_xs"
                             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
                     </LinearLayout>
@@ -174,7 +174,7 @@
                         android:id="@+id/nav_activity_container"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="44dp" />
+                        android:layout_marginTop="@dimen/title_bar_height" />
 
                     <!-- 加载中 -->
                     <LinearLayout
@@ -187,8 +187,8 @@
                         android:visibility="gone">
 
                         <ProgressBar
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="@dimen/list_item_icon_size"
+                            android:layout_height="@dimen/list_item_icon_size"
                             android:indeterminateTint="#00CED1" />
 
                         <TextView
@@ -198,7 +198,7 @@
                             android:layout_marginTop="12dp"
                             android:text="正在加载导航..."
                             android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/text_size_small" />
 
                     </LinearLayout>
 
@@ -216,7 +216,7 @@
                 android:clipToOutline="true"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="12dp">
+                android:padding="@dimen/spacing_sm">
 
                 <!-- 左侧：音乐信息 -->
                 <LinearLayout
@@ -233,8 +233,8 @@
                         android:gravity="center_vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="@dimen/icon_inner_size"
+                            android:layout_height="@dimen/icon_inner_size"
                             android:src="@drawable/ic_music"
                             android:tint="#FF6B6B" />
 
@@ -242,10 +242,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/spacing_sm"
                             android:text="音乐"
                             android:textColor="#FFFFFF"
-                            android:textSize="15sp"
+                            android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold" />
 
                         <!-- 音乐插件选择按钮 -->
@@ -255,8 +255,8 @@
                             android:layout_height="wrap_content"
                             android:text="选择 ▼"
                             android:textColor="#FF6B6B"
-                            android:textSize="11sp"
-                            android:padding="4dp"
+                            android:textSize="@dimen/text_size_micro"
+                            android:padding="@dimen/spacing_xs"
                             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
                     </LinearLayout>
@@ -271,17 +271,17 @@
 
                         <ImageView
                             android:id="@+id/music_album"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
+                            android:layout_width="@dimen/list_item_icon_size"
+                            android:layout_height="@dimen/list_item_icon_size"
                             android:src="@drawable/ic_music"
                             android:background="@drawable/bg_icon_cyan"
-                            android:padding="10dp" />
+                            android:padding="@dimen/spacing_sm" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="12dp"
+                            android:layout_marginStart="@dimen/spacing_sm"
                             android:orientation="vertical">
 
                             <TextView
@@ -290,7 +290,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="未在播放"
                                 android:textColor="#FFFFFF"
-                                android:textSize="14sp"
+                                android:textSize="@dimen/text_size_small"
                                 android:textStyle="bold"
                                 android:maxLines="1"
                                 android:ellipsize="end" />

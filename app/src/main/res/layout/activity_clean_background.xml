@@ -8,17 +8,17 @@
     <!-- 顶部标题栏 -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:layout_height="@dimen/title_bar_height"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md">
 
         <ImageView
             android:id="@+id/btn_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/title_bar_back_size"
+            android:layout_height="@dimen/title_bar_back_size"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_back"
-            android:padding="8dp"
+            android:padding="@dimen/title_bar_back_padding"
             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
         <TextView
@@ -26,10 +26,10 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/btn_back"
             android:layout_centerVertical="true"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="一键清理"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
 
     </RelativeLayout>
@@ -39,10 +39,10 @@
         android:id="@+id/tv_memory_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:padding="@dimen/spacing_md"
         android:text="内存使用: 0 MB / 0 MB (0%)"
         android:textColor="@color/text_primary"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_size_medium"
         android:gravity="center" />
 
     <!-- 全选/取消按钮 -->
@@ -50,15 +50,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md">
 
         <Button
             android:id="@+id/btn_select_all"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="@dimen/spacing_sm"
             android:text="全选"
             android:textColor="@color/text_primary"
             android:background="@drawable/bg_button_secondary" />
@@ -80,18 +80,18 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="@dimen/spacing_md" />
 
     <!-- 清理按钮 -->
     <Button
         android:id="@+id/btn_clean"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/spacing_md"
         android:text="清理选中应用"
         android:textColor="@color/text_primary"
-        android:textSize="18sp"
-        android:padding="16dp"
+        android:textSize="@dimen/text_size_normal"
+        android:padding="@dimen/spacing_md"
         android:background="@drawable/bg_button_primary" />
 
 </LinearLayout>

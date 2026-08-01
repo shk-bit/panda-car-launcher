@@ -25,8 +25,8 @@
         <!-- 静音按钮 -->
         <ImageView
             android:id="@+id/iv_mute"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/list_btn_size"
+            android:layout_height="@dimen/list_btn_size"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_volume"
@@ -47,12 +47,12 @@
         <!-- 减小按钮 -->
         <TextView
             android:id="@+id/btn_media_minus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/list_btn_size"
+            android:layout_height="@dimen/list_btn_size"
             android:gravity="center"
             android:text="-"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
             android:background="@drawable/bg_volume_btn" />
 
@@ -60,7 +60,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="@string/volume_media"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_size_small" />
@@ -71,8 +71,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_sm"
             android:progressTint="@color/primary"
             android:thumbTint="@color/primary" />
 
@@ -81,7 +81,7 @@
             android:id="@+id/tv_media_volume"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="36dp"
+            android:minWidth="@dimen/list_btn_size"
             android:gravity="end"
             android:text="0"
             android:textColor="@color/primary"
@@ -90,13 +90,13 @@
         <!-- 增大按钮 -->
         <TextView
             android:id="@+id/btn_media_plus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="@dimen/list_btn_size"
+            android:layout_height="@dimen/list_btn_size"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:gravity="center"
             android:text="+"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
             android:background="@drawable/bg_volume_btn" />
 
@@ -112,19 +112,19 @@
 
         <TextView
             android:id="@+id/btn_ring_minus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/list_btn_size"
+            android:layout_height="@dimen/list_btn_size"
             android:gravity="center"
             android:text="-"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
             android:background="@drawable/bg_volume_btn" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="@string/volume_ring"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_size_small" />
@@ -134,8 +134,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_sm"
             android:progressTint="@color/primary"
             android:thumbTint="@color/primary" />
 
@@ -143,7 +143,7 @@
             android:id="@+id/tv_ring_volume"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="36dp"
+            android:minWidth="@dimen/list_btn_size"
             android:gravity="end"
             android:text="0"
             android:textColor="@color/primary"
@@ -151,13 +151,13 @@
 
         <TextView
             android:id="@+id/btn_ring_plus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="@dimen/list_btn_size"
+            android:layout_height="@dimen/list_btn_size"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:gravity="center"
             android:text="+"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
             android:background="@drawable/bg_volume_btn" />
 
@@ -172,19 +172,19 @@
 
         <TextView
             android:id="@+id/btn_alarm_minus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/list_btn_size"
+            android:layout_height="@dimen/list_btn_size"
             android:gravity="center"
             android:text="-"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
             android:background="@drawable/bg_volume_btn" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="@string/volume_alarm"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_size_small" />
@@ -194,8 +194,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_sm"
             android:progressTint="@color/primary"
             android:thumbTint="@color/primary" />
 
@@ -203,7 +203,7 @@
             android:id="@+id/tv_alarm_volume"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="36dp"
+            android:minWidth="@dimen/list_btn_size"
             android:gravity="end"
             android:text="0"
             android:textColor="@color/primary"
@@ -211,13 +211,13 @@
 
         <TextView
             android:id="@+id/btn_alarm_plus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="@dimen/list_btn_size"
+            android:layout_height="@dimen/list_btn_size"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:gravity="center"
             android:text="+"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold"
             android:background="@drawable/bg_volume_btn" />
 

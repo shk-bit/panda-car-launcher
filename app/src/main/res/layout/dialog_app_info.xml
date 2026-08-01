@@ -4,8 +4,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/bg_card"
-    android:padding="20dp"
-    android:layout_margin="40dp">
+    android:padding="@dimen/dialog_padding"
+    android:layout_margin="@dimen/spacing_lg">
 
     <!-- 顶部：图标 + 名称 + 关闭按钮 -->
     <RelativeLayout
@@ -15,19 +15,19 @@
         <!-- 应用图标 -->
         <ImageView
             android:id="@+id/iv_app_icon"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/app_icon_size"
+            android:layout_height="@dimen/app_icon_size"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_apps" />
 
         <!-- 关闭按钮 -->
         <ImageView
             android:id="@+id/btn_close"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/list_btn_size"
+            android:layout_height="@dimen/list_btn_size"
             android:layout_alignParentEnd="true"
             android:src="@drawable/ic_close"
-            android:padding="4dp" />
+            android:padding="@dimen/spacing_xs" />
 
     </RelativeLayout>
 
@@ -37,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="@dimen/spacing_sm"
         android:text="应用名称"
         android:textColor="@color/text_primary"
         android:textSize="@dimen/text_size_large"
@@ -49,15 +49,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/spacing_xs"
         android:text="包名: com.example.app"
         android:textColor="@color/primary"
         android:textSize="@dimen/text_size_small"
         android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp" />
+        android:paddingStart="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_sm"
+        android:paddingTop="@dimen/spacing_xs"
+        android:paddingBottom="@dimen/spacing_xs" />
 
     <!-- 版本信息 -->
     <TextView
@@ -65,7 +65,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/spacing_xs"
         android:text="版本: 1.0.0"
         android:textColor="@color/text_secondary"
         android:textSize="@dimen/text_size_small" />
@@ -95,8 +95,8 @@
     <!-- 分隔线 -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="@dimen/divider_height"
+        android:layout_marginTop="@dimen/spacing_md"
         android:background="@color/divider" />
 
     <!-- 操作按钮区域 -->
@@ -104,7 +104,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/spacing_md"
         android:gravity="center">
 
         <!-- 启动 -->
@@ -115,18 +115,18 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp"
+            android:padding="@dimen/spacing_sm"
             android:background="?android:attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_navigation" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:text="启动"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small" />
@@ -141,18 +141,18 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp"
+            android:padding="@dimen/spacing_sm"
             android:background="?android:attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_delete" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:text="卸载"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small" />
@@ -167,18 +167,18 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp"
+            android:padding="@dimen/spacing_sm"
             android:background="?android:attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_settings" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:text="详情"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small" />
@@ -193,18 +193,18 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp"
+            android:padding="@dimen/spacing_sm"
             android:background="?android:attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_add" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:text="桌面"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small" />
@@ -219,12 +219,12 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp"
+            android:padding="@dimen/spacing_sm"
             android:background="?android:attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_apps"
                 android:background="@drawable/bg_icon_cyan"
                 android:padding="6dp" />
@@ -232,7 +232,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:text="悬浮"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small" />

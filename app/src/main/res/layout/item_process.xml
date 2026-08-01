@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="12dp"
+    android:padding="@dimen/list_item_padding"
     android:gravity="center_vertical"
     android:background="?android:attr/selectableItemBackground">
 
@@ -16,7 +16,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="@dimen/spacing_sm"
         android:orientation="vertical">
 
         <TextView
@@ -25,16 +25,16 @@
             android:layout_height="wrap_content"
             android:text="应用名称"
             android:textColor="@color/text_primary"
-            android:textSize="16sp" />
+            android:textSize="@dimen/text_size_medium" />
 
         <TextView
             android:id="@+id/tv_package_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/spacing_xs"
             android:text="com.example.app"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+            android:textSize="@dimen/text_size_micro" />
 
     </LinearLayout>
 

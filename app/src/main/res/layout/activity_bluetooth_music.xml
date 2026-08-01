@@ -8,17 +8,17 @@
     <!-- 顶部标题栏 -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:layout_height="@dimen/title_bar_height"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md">
 
         <ImageView
             android:id="@+id/btn_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/title_bar_back_size"
+            android:layout_height="@dimen/title_bar_back_size"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_back"
-            android:padding="8dp"
+            android:padding="@dimen/title_bar_back_padding"
             android:background="?android:attr/selectableItemBackgroundBorderless" />
 
         <TextView
@@ -26,17 +26,17 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/btn_back"
             android:layout_centerVertical="true"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="蓝牙音乐"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_size_large"
             android:textStyle="bold" />
 
         <!-- 蓝牙状态 -->
         <ImageView
             android:id="@+id/iv_bluetooth_status"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/icon_inner_size"
+            android:layout_height="@dimen/icon_inner_size"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_bluetooth_disabled" />
@@ -48,9 +48,9 @@
         android:id="@+id/card_bluetooth_devices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
+        android:layout_margin="@dimen/spacing_md"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="@dimen/card_elevation"
         app:cardBackgroundColor="@color/card_glass"
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -58,27 +58,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="@dimen/spacing_md">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="已配对设备"
                 android:textColor="@color/text_primary"
-                android:textSize="16sp"
+                android:textSize="@dimen/text_size_medium"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_bluetooth_devices"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="@dimen/spacing_sm" />
 
             <Button
                 android:id="@+id/btn_scan_bluetooth"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/spacing_sm"
                 android:text="扫描设备"
                 android:textColor="@color/text_primary"
                 android:background="@drawable/bg_button_secondary" />
@@ -92,11 +92,11 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginEnd="@dimen/spacing_md"
+        android:layout_marginBottom="@dimen/spacing_md"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="@dimen/card_elevation"
         app:cardBackgroundColor="@color/card_glass"
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -104,7 +104,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="16dp"
+            android:padding="@dimen/spacing_md"
             android:gravity="center">
 
             <!-- 歌曲信息 -->
@@ -114,7 +114,7 @@
                 android:layout_height="wrap_content"
                 android:text="未播放"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textSize="@dimen/text_size_large"
                 android:textStyle="bold"
                 android:maxLines="1"
                 android:ellipsize="end" />
@@ -123,10 +123,10 @@
                 android:id="@+id/tv_song_artist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/spacing_xs"
                 android:text="未知歌手"
                 android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
+                android:textSize="@dimen/text_size_small" />
 
             <!-- 歌词显示 -->
             <ScrollView
@@ -134,7 +134,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/spacing_md"
                 android:fillViewport="true">
 
                 <TextView
@@ -144,7 +144,7 @@
                     android:gravity="center"
                     android:text="暂无歌词"
                     android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_size_small"
                     android:lineSpacingMultiplier="1.5" />
 
             </ScrollView>
@@ -153,7 +153,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/spacing_md"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
@@ -163,15 +163,15 @@
                     android:layout_height="wrap_content"
                     android:text="00:00"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/text_size_micro" />
 
                 <SeekBar
                     android:id="@+id/seek_progress"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:layout_marginEnd="@dimen/spacing_sm"
                     android:progressTint="@color/primary"
                     android:thumbTint="@color/primary" />
 
@@ -181,7 +181,7 @@
                     android:layout_height="wrap_content"
                     android:text="00:00"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
+                    android:textSize="@dimen/text_size_micro" />
 
             </LinearLayout>
 
@@ -189,34 +189,34 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/spacing_md"
                 android:orientation="horizontal"
                 android:gravity="center">
 
                 <ImageView
                     android:id="@+id/btn_prev"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="@dimen/list_item_icon_size"
+                    android:layout_height="@dimen/list_item_icon_size"
                     android:src="@drawable/ic_prev"
-                    android:padding="8dp"
+                    android:padding="@dimen/spacing_sm"
                     android:background="?android:attr/selectableItemBackgroundBorderless" />
 
                 <ImageView
                     android:id="@+id/btn_play_pause"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginEnd="24dp"
+                    android:layout_width="@dimen/app_icon_size"
+                    android:layout_height="@dimen/app_icon_size"
+                    android:layout_marginStart="@dimen/spacing_lg"
+                    android:layout_marginEnd="@dimen/spacing_lg"
                     android:src="@drawable/ic_play"
-                    android:padding="8dp"
+                    android:padding="@dimen/spacing_sm"
                     android:background="@drawable/bg_play_button" />
 
                 <ImageView
                     android:id="@+id/btn_next"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="@dimen/list_item_icon_size"
+                    android:layout_height="@dimen/list_item_icon_size"
                     android:src="@drawable/ic_next"
-                    android:padding="8dp"
+                    android:padding="@dimen/spacing_sm"
                     android:background="?android:attr/selectableItemBackgroundBorderless" />
 
             </LinearLayout>

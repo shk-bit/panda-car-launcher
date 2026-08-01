@@ -29,4 +29,36 @@
     <dimen name="spacing_md">10dp</dimen>
     <dimen name="spacing_lg">16dp</dimen>
     <dimen name="spacing_xl">20dp</dimen>
+
+    <!-- 标题栏 -->
+    <dimen name="title_bar_height">52dp</dimen>
+    <dimen name="title_bar_back_size">38dp</dimen>
+    <dimen name="title_bar_back_padding">7dp</dimen>
+
+    <!-- 列表项 -->
+    <dimen name="list_item_icon_size">44dp</dimen>
+    <dimen name="list_item_height">60dp</dimen>
+    <dimen name="list_item_padding">11dp</dimen>
+    <dimen name="list_btn_size">34dp</dimen>
+
+    <!-- 图标容器 -->
+    <dimen name="icon_bg_size">38dp</dimen>
+    <dimen name="icon_inner_size">22dp</dimen>
+
+    <!-- 对话框 -->
+    <dimen name="dialog_padding">18dp</dimen>
+    <dimen name="dialog_item_height">52dp</dimen>
+    <dimen name="dialog_item_icon_size">38dp</dimen>
+
+    <!-- 分类标签 -->
+    <dimen name="tab_height">30dp</dimen>
+    <dimen name="tab_padding_h">13dp</dimen>
+
+    <!-- 搜索栏 -->
+    <dimen name="search_bar_height">34dp</dimen>
+    <dimen name="search_icon_size">19dp</dimen>
+
+    <!-- 分割线 -->
+    <dimen name="divider_height">0.5dp</dimen>
+    <dimen name="divider_margin_start">64dp</dimen>
 </resources>

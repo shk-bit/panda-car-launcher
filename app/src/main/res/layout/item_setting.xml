@@ -12,8 +12,8 @@
 
     <!-- 图标背景 -->
     <FrameLayout
-        android:layout_width="40dp"
-        android:layout_height="40dp">
+        android:layout_width="@dimen/icon_bg_size"
+        android:layout_height="@dimen/icon_bg_size">
 
         <View
             android:id="@+id/icon_bg"
@@ -23,8 +23,8 @@
 
         <ImageView
             android:id="@+id/iv_setting_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/icon_inner_size"
+            android:layout_height="@dimen/icon_inner_size"
             android:layout_gravity="center"
             android:src="@drawable/ic_settings"
             android:contentDescription="设置图标" />
@@ -65,8 +65,8 @@
     <!-- 右侧箭头 -->
     <ImageView
         android:id="@+id/iv_arrow"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/icon_inner_size"
+        android:layout_height="@dimen/icon_inner_size"
         android:src="@drawable/ic_back"
         android:rotation="180"
         android:contentDescription="进入"

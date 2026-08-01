@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/bg_card"
-    android:padding="12dp">
+    android:padding="@dimen/spacing_sm">
 
     <!-- 菜单标题 -->
     <TextView
@@ -14,7 +14,7 @@
         android:textColor="@color/text_primary"
         android:textSize="@dimen/text_size_small"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="@dimen/spacing_sm" />
 
     <!-- 功能按钮网格 -->
     <GridLayout
@@ -30,20 +30,20 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp">
+            android:padding="@dimen/spacing_sm">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_home"
                 android:background="@drawable/bg_icon_cyan"
-                android:padding="6dp" />
+                android:padding="@dimen/spacing_xs" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="桌面"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_micro"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="@dimen/spacing_xs" />
         </LinearLayout>
 
         <!-- 返回 -->
@@ -53,20 +53,20 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp">
+            android:padding="@dimen/spacing_sm">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_back"
                 android:background="@drawable/bg_icon_blue"
-                android:padding="6dp" />
+                android:padding="@dimen/spacing_xs" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="返回"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_micro"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="@dimen/spacing_xs" />
         </LinearLayout>
 
         <!-- 最近任务 -->
@@ -76,20 +76,20 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp">
+            android:padding="@dimen/spacing_sm">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_apps"
                 android:background="@drawable/bg_icon_green"
-                android:padding="6dp" />
+                android:padding="@dimen/spacing_xs" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="任务"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_micro"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="@dimen/spacing_xs" />
         </LinearLayout>
 
         <!-- 音乐 -->
@@ -99,20 +99,20 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp">
+            android:padding="@dimen/spacing_sm">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_music"
                 android:background="@drawable/bg_icon_orange"
-                android:padding="6dp" />
+                android:padding="@dimen/spacing_xs" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="音乐"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_micro"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="@dimen/spacing_xs" />
         </LinearLayout>
 
         <!-- 导航 -->
@@ -122,20 +122,20 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp">
+            android:padding="@dimen/spacing_sm">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_navigation"
                 android:background="@drawable/bg_icon_purple"
-                android:padding="6dp" />
+                android:padding="@dimen/spacing_xs" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="导航"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_micro"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="@dimen/spacing_xs" />
         </LinearLayout>
 
         <!-- 关闭 -->
@@ -145,20 +145,20 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:padding="8dp">
+            android:padding="@dimen/spacing_sm">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/icon_inner_size"
+                android:layout_height="@dimen/icon_inner_size"
                 android:src="@drawable/ic_close"
                 android:background="@drawable/bg_icon_red"
-                android:padding="6dp" />
+                android:padding="@dimen/spacing_xs" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="关闭"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_micro"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="@dimen/spacing_xs" />
         </LinearLayout>
 
     </GridLayout>

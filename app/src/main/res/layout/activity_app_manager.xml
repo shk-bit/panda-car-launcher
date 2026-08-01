@@ -8,19 +8,19 @@
     <!-- 顶部栏：返回 + 标题 + 搜索框（同一行） -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="@dimen/title_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp">
+        android:paddingStart="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_sm">
 
         <!-- 返回按钮 -->
         <ImageView
             android:id="@+id/btn_back"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/title_bar_back_size"
+            android:layout_height="@dimen/title_bar_back_size"
             android:src="@drawable/ic_back"
-            android:padding="6dp"
+            android:padding="@dimen/title_bar_back_padding"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="返回" />
 
@@ -28,7 +28,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:text="应用管理"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_size_normal"
@@ -37,18 +37,18 @@
         <!-- 搜索框 -->
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="32dp"
+            android:layout_height="@dimen/search_bar_height"
             android:layout_weight="1"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:background="@drawable/bg_card"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp">
+            android:paddingStart="@dimen/spacing_sm"
+            android:paddingEnd="@dimen/spacing_sm">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="@dimen/search_icon_size"
+                android:layout_height="@dimen/search_icon_size"
                 android:src="@drawable/ic_search"
                 android:alpha="0.6" />
 
@@ -57,7 +57,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="@dimen/spacing_sm"
                 android:background="@null"
                 android:hint="搜索应用..."
                 android:textColorHint="@color/text_hint"
@@ -71,11 +71,11 @@
         <!-- 刷新按钮 -->
         <ImageView
             android:id="@+id/btn_refresh"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="@dimen/title_bar_back_size"
+            android:layout_height="@dimen/title_bar_back_size"
+            android:layout_marginStart="@dimen/spacing_sm"
             android:src="@drawable/ic_refresh"
-            android:padding="6dp"
+            android:padding="@dimen/title_bar_back_padding"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="刷新" />
 
@@ -86,10 +86,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:paddingStart="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_sm"
+        android:paddingTop="@dimen/spacing_xs"
+        android:paddingBottom="@dimen/spacing_xs">
 
         <LinearLayout
             android:id="@+id/category_tabs"
@@ -100,10 +100,10 @@
             <TextView
                 android:id="@+id/tab_all"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="@dimen/tab_height"
                 android:gravity="center"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
+                android:paddingStart="@dimen/tab_padding_h"
+                android:paddingEnd="@dimen/tab_padding_h"
                 android:text="全部"
                 android:textColor="@color/primary"
                 android:textSize="@dimen/text_size_small"
@@ -112,11 +112,11 @@
             <TextView
                 android:id="@+id/tab_navigation"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="@dimen/tab_height"
                 android:gravity="center"
-                android:layout_marginStart="8dp"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:paddingStart="@dimen/tab_padding_h"
+                android:paddingEnd="@dimen/tab_padding_h"
                 android:text="导航"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small"
@@ -125,11 +125,11 @@
             <TextView
                 android:id="@+id/tab_music"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="@dimen/tab_height"
                 android:gravity="center"
-                android:layout_marginStart="8dp"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:paddingStart="@dimen/tab_padding_h"
+                android:paddingEnd="@dimen/tab_padding_h"
                 android:text="音乐"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small"
@@ -138,11 +138,11 @@
             <TextView
                 android:id="@+id/tab_video"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="@dimen/tab_height"
                 android:gravity="center"
-                android:layout_marginStart="8dp"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:paddingStart="@dimen/tab_padding_h"
+                android:paddingEnd="@dimen/tab_padding_h"
                 android:text="视频"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small"
@@ -151,11 +151,11 @@
             <TextView
                 android:id="@+id/tab_tool"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
+                android:layout_height="@dimen/tab_height"
                 android:gravity="center"
-                android:layout_marginStart="8dp"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:paddingStart="@dimen/tab_padding_h"
+                android:paddingEnd="@dimen/tab_padding_h"
                 android:text="工具"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_size_small"
@@ -171,8 +171,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="8dp" />
+        android:paddingStart="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_sm"
+        android:paddingBottom="@dimen/spacing_sm" />
 
 </LinearLayout>
