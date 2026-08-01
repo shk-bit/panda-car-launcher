@@ -66,8 +66,6 @@ class NavMapHelper(private val context: Context) {
             config.osmdroidTileCache = java.io.File(cacheDir, "osm_tiles")
             config.osmdroidBasePath = java.io.File(cacheDir, "osm")
             config.cacheMapTileCount = 200
-            config.cacheMapTileMaxBytes = 50L * 1024 * 1024
-            config.expireCacheAfter = 30
             Log.d(TAG, "osmdroid 配置完成")
         } catch (e: Exception) {
             Log.e(TAG, "osmdroid 配置失败", e)
@@ -122,7 +120,8 @@ class NavMapHelper(private val context: Context) {
                 maxZoomLevel = 19.0
                 controller.setZoom(DEFAULT_ZOOM)
                 controller.setCenter(DEFAULT_CENTER)
-                setMapBackgroundColor(Color.parseColor("#1a1f2e"))
+                // 设置地图背景色（osmdroid 6.1.x 没有 setMapBackgroundColor，使用 setBackground）
+                setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.parseColor("#1a1f2e")))
             }
 
             // 旋转手势
