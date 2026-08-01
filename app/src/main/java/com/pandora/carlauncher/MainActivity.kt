@@ -23,10 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.app.ActivityManager
-import android.hardware.display.DisplayManager
 import android.view.KeyEvent
-import android.view.MotionEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -58,11 +55,8 @@ class MainActivity : AppCompatActivity() {
     private var customApps = mutableListOf<CustomApp>()
     private lateinit var gridAdapter: AppGridAdapter
 
-    // 嵌入式地图助手
-    private var navMapHelper: NavMapHelper? = null
-
-    // 导航类型
-    private var currentNavType = "amap" // amap, baidu, tencent
+    /** 导航是否正在运行（悬浮窗叠加模式） */
+    private var isNavRunning = false
 
     private val updateTimeRunnable = object : Runnable {
         override fun run() {
@@ -132,23 +126,20 @@ class MainActivity : AppCompatActivity() {
         setupBottomAppsRecyclerView()
         // 刷新壁纸
         applyWallpaper()
-        // 刷新导航地图类型显示
+        // 刷新导航状态显示
         updateNavSwitchText()
-        // 恢复嵌入式地图
-        navMapHelper?.onResume()
+        // 从导航返回后刷新导航面板状态
+        refreshNavPanel()
     }
 
     override fun onPause() {
         super.onPause()
-        // 暂停嵌入式地图（节省资源）
-        navMapHelper?.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // 销毁嵌入式地图
-        navMapHelper?.destroyMap()
-        navMapHelper = null
+        // 停止悬浮状态服务
+        FloatingNavManager.stopFloatingStatusService(this)
         // 移除定时器回调
         handler.removeCallbacks(updateTimeRunnable)
         musicRefreshHandler.removeCallbacks(musicRefreshRunnable)
@@ -266,14 +257,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
-            if (granted) {
-                // 定位权限已授权，重新启用地图位置追踪
-                navMapHelper?.reEnableLocation()
-                Toast.makeText(this, "定位权限已授权", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     /**
@@ -455,55 +438,12 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 显示导航切换对话框
+     *
+     * 使用 FloatingNavManager 查找已安装的地图，跳转设置页选择
      */
     private fun showNavSwitchDialog() {
-        // 动态获取已安装的地图
-        val installed = findInstalledMapBinding()
-        val items = if (installed.isEmpty()) {
-            arrayOf("高德地图(在线)", "百度地图(在线)", "腾讯地图(在线)")
-        } else {
-            installed.map { it.name }.toTypedArray()
-        }
-
-        val currentIndex = installed.indexOfFirst {
-            it.type == currentNavType
-        }.coerceAtLeast(0)
-
-        AlertDialog.Builder(this)
-            .setTitle("选择导航")
-            .setSingleChoiceItems(items, currentIndex) { dialog, which ->
-                if (installed.isNotEmpty() && which < installed.size) {
-                    val binding = installed[which]
-                    currentNavType = binding.type
-                    val navName = binding.name
-                    findViewById<TextView>(R.id.nav_switch)?.text = "$navName ▼"
-
-                    // 如果导航已打开，切换到新地图
-                    if (embeddedNavType != null) {
-                        launchMapAppPip(binding.packageName, binding.name)
-                    }
-                } else {
-                    // 在线版
-                    currentNavType = when (which) {
-                        1 -> "baidu"
-                        2 -> "tencent"
-                        else -> "amap"
-                    }
-                    val navName = when (currentNavType) {
-                        "baidu" -> "百度"
-                        "tencent" -> "腾讯"
-                        else -> "高德"
-                    }
-                    findViewById<TextView>(R.id.nav_switch)?.text = "$navName ▼"
-
-                    if (embeddedNavType != null) {
-                        launchMapFallback()
-                    }
-                }
-                dialog.dismiss()
-            }
-            .setNegativeButton("取消", null)
-            .show()
+        // 直接跳转到悬浮导航设置页，在设置页中选择地图类型
+        startActivity(Intent(this, FloatingNavSettingsActivity::class.java))
     }
 
     /**
@@ -1221,185 +1161,198 @@ class MainActivity : AppCompatActivity() {
     // ========== 嵌入式导航 ==========
 
     /**
-     * 主流车机地图绑定信息
-     */
-    data class MapBinding(
-        val type: String,        // amap, baidu, tencent, sogou
-        val name: String,        // 显示名称
-        val packageName: String, // 包名
-        val webUrl: String,       // WebView 内嵌 URL
-        val className: String? = null  // 可选：直接启动的 Activity
-    )
-
-    /**
-     * 主流车机地图绑定列表
-     */
-    private val mapBindings: List<MapBinding> = listOf(
-        // 高德地图
-        MapBinding("amap", "高德地图车机版", "com.autonavi.amapauto",
-            "https://m.amap.com/navi/", "com.autonavi.map.activity.SplashActivity"),
-        MapBinding("amap", "高德地图", "com.autonavi.minimap",
-            "https://m.amap.com/navi/"),
-        MapBinding("amap", "高德地图车机共存版", "com.autonavi.amapauto.chenmo",
-            "https://m.amap.com/navi/"),
-        MapBinding("amap", "高德地图U3D版", "com.autonavi.amapauto.u3d",
-            "https://m.amap.com/navi/"),
-        // 百度地图
-        MapBinding("baidu", "百度地图车机版", "com.baidu.naviauto",
-            "https://map.baidu.com/mobile/webapp/index/index"),
-        MapBinding("baidu", "百度地图", "com.baidu.BaiduMap",
-            "https://map.baidu.com/mobile/webapp/index/index"),
-        MapBinding("baidu", "百度CarLife", "com.baidu.carlife",
-            "https://map.baidu.com/mobile/webapp/index/index"),
-        // 腾讯地图
-        MapBinding("tencent", "腾讯地图", "com.tencent.map",
-            "https://map.qq.com/m/"),
-        // 搜狗地图
-        MapBinding("sogou", "搜狗地图", "com.sogou.map.android",
-            "https://map.sogou.com/"),
-        // 美团
-        MapBinding("meituan", "美团", "com.sankuai.meituan",
-            "https://i.meituan.com/"),
-        // Google Maps
-        MapBinding("google", "Google Maps", "com.google.android.apps.maps",
-            "https://www.google.com/maps")
-    )
-
-    /** 当前嵌入的地图类型 */
-    private var embeddedNavType: String? = null
-
-    /** 当前嵌入的地图包名 */
-    private var embeddedNavPkg: String? = null
-
-    /**
      * 打开导航（底部导航栏按钮 + 占位页点击）
      *
-     * 在导航区域显示可交互的嵌入式地图：
-     * 1. 隐藏占位页，显示 SDK 容器
-     * 2. 创建 osmdroid MapView（高德瓦片源）放入 nav_activity_container
-     * 3. 地图支持缩放、拖动、旋转
-     * 4. 顶部工具栏显示「开始导航」按钮，点击启动全屏地图APP
+     * 【方案1 悬浮窗叠加方案】
+     * 1. 权限校验：检查桌面悬浮窗权限
+     * 2. 包名检测：查找已安装的修改版悬浮地图APP
+     * 3. 拉起地图APP：Intent 启动选中的地图
+     * 4. 延时返回：2500ms 后自动切回桌面，地图悬浮窗叠加在桌面上层
+     *
+     * PandaDesk 不集成地图SDK、不渲染地图画面。
+     * 地图显示完全依赖修改版地图APP自身的悬浮窗能力。
      */
     private fun openNavigation() {
+        // 权限校验
+        if (!FloatingNavManager.hasOwnOverlayPermission(this)) {
+            showOverlayPermissionGuide()
+            return
+        }
+
+        // 获取选中地图
         val mapType = FloatingNavManager.getSelectedMapType(this)
         val mapName = FloatingNavManager.getMapDisplayName(mapType)
         val mapResult = FloatingNavManager.getInstalledSelectedMap(this)
 
-        // 切换到 SDK 容器视图
-        findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
-        findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
-        findViewById<View>(R.id.nav_loading)?.visibility = View.VISIBLE
-        findViewById<TextView>(R.id.nav_loading_text)?.text = "正在加载地图..."
-        findViewById<TextView>(R.id.nav_sdk_title)?.text = mapName
-        findViewById<TextView>(R.id.nav_status)?.text = "$mapName"
-
-        // 创建嵌入式地图
-        val container = findViewById<FrameLayout>(R.id.nav_activity_container)
-        if (container == null) {
-            Log.e(TAG, "nav_activity_container 不存在")
-            showNavPlaceholder()
+        // 包名检测：未安装时弹出提示
+        if (mapResult == null) {
+            showMapNotInstalledDialog(mapType)
             return
         }
 
-        // 销毁旧地图
-        navMapHelper?.destroyMap()
+        // 显示导航运行状态面板
+        showNavRunningPanel(mapName, mapResult)
 
-        // 创建新的地图助手
-        navMapHelper = NavMapHelper(this)
-        val success = navMapHelper?.createMap(container) ?: false
-
-        if (success) {
-            // 地图创建成功，隐藏加载提示
-            findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
-
-            // 在地图上叠加「开始导航」按钮
-            addNavActionButton(container, mapName, mapResult != null)
-
-            // 请求定位权限（用于显示当前位置）
-            requestLocationPermission()
-        } else {
-            // 地图创建失败
-            findViewById<TextView>(R.id.nav_loading_text)?.text = "地图加载失败"
-            Log.e(TAG, "嵌入式地图创建失败")
+        // 拉起地图APP + 延时返回桌面（核心调度逻辑在 FloatingNavManager 中）
+        val launched = FloatingNavManager.launchFloatingNav(this)
+        if (launched) {
+            isNavRunning = true
+            Log.d(TAG, "导航已启动: $mapName (${mapResult.mode})")
         }
     }
 
     /**
-     * 在地图容器上叠加「开始导航」按钮
+     * 显示导航运行状态面板
      *
-     * 按钮浮在地图右下角，点击后启动选中的地图APP进行全屏导航
+     * 导航区域从占位页切换为运行状态面板：
+     * - 显示当前导航地图名称
+     * - 显示导航模式（悬浮版/全屏版）
+     * - 提供「切回地图」「关闭导航」按钮
      */
-    private fun addNavActionButton(container: FrameLayout, mapName: String, mapInstalled: Boolean) {
-        // 移除旧的按钮（如果有）
-        for (i in container.childCount - 1 downTo 0) {
-            val child = container.getChildAt(i)
-            if (child is TextView && child.tag == "nav_action_button") {
-                container.removeViewAt(i)
-            }
+    private fun showNavRunningPanel(mapName: String, mapResult: FloatingNavManager.MapInstallResult) {
+        // 隐藏占位页，显示运行面板
+        findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
+        findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
+
+        // 更新标题
+        findViewById<TextView>(R.id.nav_sdk_title)?.text = mapName
+
+        // 模式提示
+        val modeText = when (mapResult.mode) {
+            FloatingNavManager.MapMode.FLOATING -> "悬浮模式"
+            FloatingNavManager.MapMode.FULLSCREEN -> "全屏模式"
         }
 
-        val density = resources.displayMetrics.density
+        // 状态文字
+        findViewById<TextView>(R.id.nav_status)?.text = "$mapName · $modeText"
 
-        // 开始导航按钮
-        val navButton = TextView(this).apply {
-            tag = "nav_action_button"
-            text = if (mapInstalled) "开始导航" else "未安装地图"
-            setTextColor(Color.WHITE)
-            textSize = 14f
-            gravity = Gravity.CENTER
-            setPadding((16 * density).toInt(), (10 * density).toInt(),
-                       (16 * density).toInt(), (10 * density).toInt())
-            background = resources.getDrawable(R.drawable.bg_button_primary, theme)
-            isClickable = true
-            isFocusable = true
-            elevation = 8 * density
+        // 隐藏加载提示
+        findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
 
-            setOnClickListener {
-                if (mapInstalled) {
-                    // 启动选中的地图APP进行全屏导航
-                    FloatingNavManager.launchFloatingNav(this@MainActivity)
-                } else {
-                    Toast.makeText(this@MainActivity,
-                        "请先安装 $mapName", Toast.LENGTH_SHORT).show()
+        // 在运行面板中显示状态信息和操作按钮
+        val container = findViewById<FrameLayout>(R.id.nav_activity_container)
+        container?.let { c ->
+            c.removeAllViews()
+
+            val density = resources.displayMetrics.density
+
+            // 状态信息布局
+            val statusLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setPadding(
+                    (24 * density).toInt(), (24 * density).toInt(),
+                    (24 * density).toInt(), (24 * density).toInt()
+                )
+            }
+
+            // 导航图标
+            val iconView = ImageView(this).apply {
+                setImageResource(R.drawable.ic_navigation)
+                setColorFilter(Color.parseColor("#00CED1"))
+                setPadding(0, 0, 0, (16 * density).toInt())
+            }
+            statusLayout.addView(iconView, LinearLayout.LayoutParams(
+                (64 * density).toInt(), (64 * density).toInt()
+            ).apply { gravity = Gravity.CENTER })
+
+            // 地图名称
+            val nameView = TextView(this).apply {
+                text = mapName
+                setTextColor(Color.WHITE)
+                textSize = 18f
+                gravity = Gravity.CENTER
+                setPadding(0, 0, 0, (8 * density).toInt())
+            }
+            statusLayout.addView(nameView)
+
+            // 模式状态
+            val modeView = TextView(this).apply {
+                text = modeText + " · 导航运行中"
+                setTextColor(Color.parseColor("#00CED1"))
+                textSize = 14f
+                gravity = Gravity.CENTER
+                setPadding(0, 0, 0, (24 * density).toInt())
+            }
+            statusLayout.addView(modeView)
+
+            // 按钮容器
+            val buttonLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER
+            }
+
+            // 「切回地图」按钮
+            val switchBtn = TextView(this).apply {
+                text = "切回地图"
+                setTextColor(Color.WHITE)
+                textSize = 14f
+                gravity = Gravity.CENTER
+                setPadding(
+                    (24 * density).toInt(), (12 * density).toInt(),
+                    (24 * density).toInt(), (12 * density).toInt()
+                )
+                background = resources.getDrawable(R.drawable.bg_button_primary, theme)
+                isClickable = true
+                isFocusable = true
+                setOnClickListener {
+                    FloatingNavManager.switchToMap(this@MainActivity)
                 }
             }
-        }
+            buttonLayout.addView(switchBtn)
 
-        val params = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            Gravity.BOTTOM or Gravity.END
-        ).apply {
-            marginEnd = (16 * density).toInt()
-            bottomMargin = (16 * density).toInt()
-        }
-
-        container.addView(navButton, params)
-    }
-
-    /**
-     * 请求定位权限（用于地图显示当前位置）
-     */
-    private fun requestLocationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ), PERMISSION_REQUEST_CODE)
+            // 间距
+            val spacer = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    (16 * density).toInt(), 1
+                )
             }
+            buttonLayout.addView(spacer)
+
+            // 「关闭导航」按钮
+            val closeBtn = TextView(this).apply {
+                text = "关闭导航"
+                setTextColor(Color.parseColor("#FF6B6B"))
+                textSize = 14f
+                gravity = Gravity.CENTER
+                setPadding(
+                    (24 * density).toInt(), (12 * density).toInt(),
+                    (24 * density).toInt(), (12 * density).toInt()
+                )
+                background = resources.getDrawable(R.drawable.bg_button_secondary, theme)
+                isClickable = true
+                isFocusable = true
+                setOnClickListener {
+                    closeNavMap()
+                }
+            }
+            buttonLayout.addView(closeBtn)
+
+            statusLayout.addView(buttonLayout)
+
+            // 提示文字
+            val tipView = TextView(this).apply {
+                text = "地图悬浮窗已叠加在桌面上层\n可拖动悬浮状态按钮调整位置"
+                setTextColor(Color.parseColor("#80FFFFFF"))
+                textSize = 12f
+                gravity = Gravity.CENTER
+                setPadding(0, (24 * density).toInt(), 0, 0)
+            }
+            statusLayout.addView(tipView)
+
+            c.addView(statusLayout, FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            ))
         }
     }
 
     /**
-     * 关闭嵌入式导航地图
-     * 销毁地图，停止悬浮状态服务，恢复占位页
+     * 关闭导航
+     * 停止悬浮状态服务，恢复占位页
      */
     private fun closeNavMap() {
-        navMapHelper?.destroyMap()
-        navMapHelper = null
+        isNavRunning = false
         FloatingNavManager.stopFloatingStatusService(this)
         showNavPlaceholder()
     }
@@ -1415,192 +1368,53 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 启动嵌入式导航（系统级方案）
-     * 使用反射创建 CarActivityView 嵌入地图APP到导航区域
-     * 参考：AOSP CarLauncher
-     * 
-     * 需要：系统签名 + ACTIVITY_EMBEDDING 权限
-     * 降级：非系统环境自动回退到直接启动地图APP
+     * 刷新导航面板状态
+     * 从地图返回桌面后调用，根据悬浮状态服务是否运行来更新面板
      */
-    private var activityViewInstance: Any? = null
-
-    private fun launchEmbeddedNav() {
-        val container = findViewById<FrameLayout>(R.id.nav_activity_container)
-        if (container == null) {
-            // 容器不存在，降级
-            launchMapFallback()
-            return
+    private fun refreshNavPanel() {
+        if (!isNavRunning) {
+            showNavPlaceholder()
         }
+    }
 
-        try {
-            // 反射创建 CarActivityView
-            val activityView = createCarActivityView(container)
-            if (activityView != null) {
-                activityViewInstance = activityView
-                setupActivityViewCallback(activityView)
-                
-                // 切换显示
-                findViewById<View>(R.id.nav_placeholder)?.visibility = View.GONE
-                findViewById<View>(R.id.nav_sdk_container)?.visibility = View.VISIBLE
-                findViewById<View>(R.id.nav_loading)?.visibility = View.GONE
-                
-                Log.d(TAG, "CarActivityView 创建成功，等待就绪")
-            } else {
-                launchMapFallback()
+    /**
+     * 显示悬浮窗权限授权引导
+     */
+    private fun showOverlayPermissionGuide() {
+        AlertDialog.Builder(this)
+            .setTitle("需要悬浮窗权限")
+            .setMessage(
+                "PandaDesk 需要悬浮窗权限才能在导航期间保持桌面显示。\n\n" +
+                "请点击「去授权」，在系统设置中开启\n" +
+                "「显示在其他应用上层」权限。"
+            )
+            .setPositiveButton("去授权") { _, _ ->
+                FloatingNavManager.requestOwnOverlayPermission(this)
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "创建 CarActivityView 失败，降级为直接启动", e)
-            launchMapFallback()
-        }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     /**
-     * 反射创建 CarActivityView
-     * 类路径：android.car.app.CarActivityView
+     * 显示地图未安装提示
+     *
+     * 重要限制：官方原版地图不支持悬浮，必须使用修改版
      */
-    private fun createCarActivityView(container: FrameLayout): Any? {
-        return try {
-            val clazz = Class.forName("android.car.app.CarActivityView")
-            val constructor = clazz.getConstructor(android.content.Context::class.java)
-            val view = constructor.newInstance(this) as? View
-            if (view != null) {
-                container.removeAllViews()
-                container.addView(view, FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
-                ))
-            }
-            view
-        } catch (e: Exception) {
-            Log.e(TAG, "反射创建 CarActivityView 失败", e)
-            null
-        }
-    }
-
-    /**
-     * 反射设置 CarActivityView 的 StateCallback
-     */
-    private fun setupActivityViewCallback(activityView: Any) {
-        try {
-            val clazz = activityView.javaClass
-            // 创建 StateCallback 的匿名实现
-            val callbackClass = Class.forName("android.car.app.CarActivityView\$StateCallback")
-            val callback = java.lang.reflect.Proxy.newProxyInstance(
-                callbackClass.classLoader,
-                arrayOf(callbackClass)
-            ) { _, method, args ->
-                when (method.name) {
-                    "onActivityViewReady" -> {
-                        Log.d(TAG, "ActivityView ready, 启动地图")
-                        try {
-                            val view = args?.get(0) as? View
-                            // 反射调用 startActivity
-                            val startMethod = clazz.getMethod(
-                                "startActivity",
-                                android.content.Intent::class.java
-                            )
-                            val intent = Intent.makeMainSelectorActivity(
-                                Intent.ACTION_MAIN,
-                                Intent.CATEGORY_APP_MAPS
-                            )
-                            startMethod.invoke(activityView, intent)
-                        } catch (e: Exception) {
-                            Log.e(TAG, "启动地图失败", e)
-                            launchMapFallback()
-                        }
-                        null
-                    }
-                    "onActivityViewDestroyed" -> {
-                        Log.d(TAG, "ActivityView destroyed")
-                        null
-                    }
-                    "onTaskMovedToFront" -> {
-                        val taskId = args?.get(0) as? Int ?: 0
-                        Log.d(TAG, "Task moved to front: $taskId")
-                        try {
-                            val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                            am.moveTaskToFront(this@MainActivity.taskId, 0)
-                        } catch (e: Exception) {
-                            Log.w(TAG, "移动Launcher到前台失败", e)
-                        }
-                        null
-                    }
-                    else -> null
-                }
-            }
-            // 反射调用 setCallback
-            val setCallbackMethod = clazz.getMethod("setCallback", callbackClass)
-            setCallbackMethod.invoke(activityView, callback)
-        } catch (e: Exception) {
-            Log.e(TAG, "设置 ActivityView 回调失败", e)
-        }
-    }
-
-    /**
-     * 降级方案：直接启动地图APP
-     */
-    private fun launchMapFallback() {
-        val installed = findInstalledMapBinding()
-        if (installed.isNotEmpty()) {
-            val target = installed.first()
-            launchMapAppPip(target.packageName, target.name)
-        } else {
-            Toast.makeText(this, "未检测到地图应用", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    /**
-     * 启动地图APP（画中画模式）
-     * 定位/语音/离线/车道级 全部由地图官方APP实现
-     */
-    private fun launchMapAppPip(packageName: String, name: String) {
-        try {
-            val intent = packageManager.getLaunchIntentForPackage(packageName)
-            if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                // 尝试传递画中画/迷你模式参数（部分地图支持）
-                intent.putExtra("pip_mode", true)
-                intent.putExtra("mini_mode", true)
-                startActivity(intent)
-                
-                // 更新状态显示
-                findViewById<TextView>(R.id.nav_status)?.text = "已启动: $name"
-                Toast.makeText(this, "已启动$name", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "无法启动$name", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            Toast.makeText(this, "启动失败: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    /**
-     * 查找已安装的地图绑定
-     */
-    private fun findInstalledMapBinding(): List<MapBinding> {
-        return mapBindings.filter { binding ->
-            try {
-                packageManager.getPackageInfo(binding.packageName, 0)
-                true
-            } catch (_: Exception) {
-                false
-            }
-        }
-    }
-
-    /**
-     * 关闭嵌入式导航，回到占位页
-     */
-    private fun closeEmbeddedNav() {
-        // 清理 ActivityView
-        activityViewInstance = null
-        val container = findViewById<FrameLayout>(R.id.nav_activity_container)
-        container?.removeAllViews()
-        
-        findViewById<View>(R.id.nav_sdk_container)?.visibility = View.GONE
-        findViewById<View>(R.id.nav_placeholder)?.visibility = View.VISIBLE
-        embeddedNavType = null
-        embeddedNavPkg = null
+    private fun showMapNotInstalledDialog(mapType: String) {
+        val mapName = FloatingNavManager.getMapDisplayName(mapType)
+        AlertDialog.Builder(this)
+            .setTitle("未安装 $mapName")
+            .setMessage(
+                "未检测到 $mapName。\n\n" +
+                "支持以下版本：\n" +
+                "• 修改版悬浮地图（推荐，支持悬浮叠加）\n" +
+                "• 官方车机版地图（全屏运行，可快速切回）\n" +
+                "• 手机版地图（全屏运行）\n\n" +
+                "⚠ 重要：官方原版地图不支持悬浮导航！\n" +
+                "请在车机应用市场搜索安装 $mapName。"
+            )
+            .setPositiveButton("知道了", null)
+            .show()
     }
 
     data class CustomApp(val packageName: String, val appName: String)

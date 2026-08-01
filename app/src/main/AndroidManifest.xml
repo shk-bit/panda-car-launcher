@@ -77,23 +77,13 @@
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
-    <!-- 悬浮窗权限 -->
+    <!-- 悬浮窗权限（悬浮导航状态按钮需要） -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
-    <!-- 系统级权限：嵌入地图Activity -->
-    <uses-permission android:name="android.permission.ACTIVITY_EMBEDDING" />
-    <!-- 系统级权限：向嵌入的地图Activity发送触摸事件 -->
-    <uses-permission android:name="android.permission.INJECT_EVENTS" />
-    <!-- 系统级权限：使用内部系统窗口 -->
-    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
-    <!-- 系统级权限：管理Activity栈 -->
-    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
-    <!-- 系统级权限：管理用户 -->
-    <uses-permission android:name="android.permission.MANAGE_USERS" />
-    <!-- 重新排序任务 -->
+    <!-- 重新排序任务（导航返回桌面需要） -->
     <uses-permission android:name="android.permission.REORDER_TASKS" />
 
     <!-- 音乐通知监听权限（布丁方式） -->

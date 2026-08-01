@@ -11,8 +11,8 @@ android {
         applicationId "com.pandora.carlauncher"
         minSdk 26
         targetSdk 34
-        versionCode 72
-        versionName "4.11.1"
+        versionCode 73
+        versionName "4.12.0"
     }
 
     buildTypes {
@@ -49,8 +49,6 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     // AndroidAutoSize 屏幕适配
     implementation 'com.github.JessYanCoding:AndroidAutoSize:v1.2.0'
-    // osmdroid 嵌入式地图（无需API Key，使用高德瓦片源）
-    implementation 'org.osmdroid:osmdroid-android:6.1.18'
     // 注意：android.car 库仅在系统编译环境(AOSP)中可用
     // 普通Android Studio编译使用反射调用，不直接依赖
     // compileOnly 'android.car:car:1.0.0' // 系统编译时取消注释
