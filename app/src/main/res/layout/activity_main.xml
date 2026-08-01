@@ -308,21 +308,21 @@
 
                     </LinearLayout>
 
-                    <!-- 歌词显示 -->
-                    <TextView
-                        android:id="@+id/music_lyrics"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_xs"
-                        android:text=""
-                        android:textColor="#FF6B6B"
-                        android:textSize="@dimen/text_size_micro"
-                        android:gravity="center_vertical"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:visibility="gone" />
-
                 </LinearLayout>
+
+                <!-- 歌词显示（独立于音乐信息行，确保完整显示） -->
+                <TextView
+                    android:id="@+id/music_lyrics"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:text=""
+                    android:textColor="#FF6B6B"
+                    android:textSize="@dimen/text_size_micro"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:visibility="gone" />
 
                 </LinearLayout>
 
