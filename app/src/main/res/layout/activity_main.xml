@@ -296,19 +296,33 @@
                                 android:ellipsize="end" />
 
                             <TextView
-                                android:id="@+id/music_artist"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text=""
-                                android:textColor="#80FFFFFF"
-                                android:textSize="12sp"
-                                android:maxLines="1"
-                                android:ellipsize="end" />
-
-                        </LinearLayout>
+                            android:id="@+id/music_artist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text=""
+                            android:textColor="#80FFFFFF"
+                            android:textSize="@dimen/text_size_micro"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
 
                     </LinearLayout>
+
+                    <!-- 歌词显示 -->
+                    <TextView
+                        android:id="@+id/music_lyrics"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:text=""
+                        android:textColor="#FF6B6B"
+                        android:textSize="@dimen/text_size_micro"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:visibility="gone" />
+
+                </LinearLayout>
 
                 </LinearLayout>
 

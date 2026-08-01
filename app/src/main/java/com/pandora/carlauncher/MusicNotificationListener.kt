@@ -97,59 +97,107 @@ class MusicNotificationListener : NotificationListenerService() {
         val artist = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
         val bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString() ?: ""
         val subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString() ?: ""
+        val tickerText = sbn.notification?.tickerText?.toString() ?: ""
+        val infoText = extras.getCharSequence(Notification.EXTRA_INFO_TEXT)?.toString() ?: ""
 
-        // 优先使用大文本中的信息（通常包含更完整的歌手信息）
-        val finalArtist = if (artist.isNotEmpty() && artist != bigText) artist else bigText
+        // 尝试从通知中提取歌词
+        // 许多音乐APP（网易云音乐、酷狗等）将当前歌词放在 EXTRA_BIG_TEXT 中
+        val lyrics = extractLyrics(extras, title, artist, bigText, subText, tickerText, infoText)
 
-        // 尝试从通知中提取歌词（部分音乐APP会在通知中显示歌词）
-        val lyrics = extractLyrics(extras, title, artist)
+        // 判断 artist 和 bigText 的关系
+        // 如果 bigText 与 artist 不同且不是歌词，则 bigText 可能是更完整的歌手信息
+        // 如果 bigText 是歌词，则保留 artist 作为歌手
+        val finalArtist = if (artist.isNotEmpty()) {
+            artist
+        } else if (bigText.isNotEmpty() && lyrics.isEmpty()) {
+            bigText
+        } else {
+            subText
+        }
 
         if (title.isNotEmpty()) {
             currentTitle = title
             currentArtist = finalArtist
             currentPackageName = pkg
-            
+
             // 更新歌词
             if (lyrics.isNotEmpty() && lyrics != currentLyrics) {
                 currentLyrics = lyrics
                 onLyricsUpdate?.invoke(lyrics)
                 Log.d(TAG, "歌词更新: $lyrics")
+            } else if (lyrics.isEmpty() && currentLyrics.isNotEmpty()) {
+                // 歌词为空时清除
+                currentLyrics = ""
+                onLyricsUpdate?.invoke("")
             }
 
             // 获取播放状态
             updatePlayState(pkg)
 
             onMusicUpdate?.invoke(currentTitle, currentArtist, isPlaying, currentPackageName)
-            Log.d(TAG, "歌曲更新: $title - $finalArtist ($pkg)")
+            Log.d(TAG, "歌曲更新: $title - $finalArtist ($pkg)" +
+                if (lyrics.isNotEmpty()) " 歌词: $lyrics" else "")
         }
     }
-    
+
     /**
      * 从通知中提取歌词
-     * 不同音乐APP的歌词位置不同
+     *
+     * 不同音乐APP的歌词存放位置：
+     * - 网易云音乐：EXTRA_BIG_TEXT 存放当前歌词行
+     * - 酷狗音乐：EXTRA_BIG_TEXT 存放当前歌词行
+     * - QQ音乐：EXTRA_BIG_TEXT 或 tickerText 存放歌词
+     * - 酷我音乐：EXTRA_SUMMARY_TEXT 或 EXTRA_INFO_TEXT 存放歌词
+     *
+     * 歌词特征：
+     * - 与标题和歌手不同
+     * - 长度适中（通常 2~200 字符）
+     * - 不包含播放状态提示文字
      */
-    private fun extractLyrics(extras: android.os.Bundle, title: String, artist: String): String {
-        // 尝试各种可能的歌词字段
-        val possibleLyrics = listOf(
-            extras.getCharSequence("android.textLines")?.toString(),  // 某些APP的歌词
-            extras.getCharSequence("android.messages")?.toString(),   // 消息样式
-            extras.getCharSequence(Notification.EXTRA_SUMMARY_TEXT)?.toString(),  // 摘要
-            extras.getCharSequence("android.bigText")?.toString()     // 大文本
+    private fun extractLyrics(
+        extras: android.os.Bundle,
+        title: String,
+        artist: String,
+        bigText: String,
+        subText: String,
+        tickerText: String,
+        infoText: String
+    ): String {
+        // 排除的非歌词文本关键词
+        val nonLyricKeywords = listOf(
+            "正在播放", "点击播放", "已暂停", "正在缓冲", "播放中",
+            "playing", "paused", "buffering", "正在加载",
+            "锁屏", "桌面歌词", "通知栏歌词"
         )
-        
-        // 查找包含歌词特征（长度适中，不是标题或歌手）的文本
-        for (text in possibleLyrics) {
-            if (!text.isNullOrEmpty() && 
-                text != title && 
-                text != artist && 
-                text.length > 5 && 
-                text.length < 100 &&
-                !text.contains("正在播放") &&
-                !text.contains("点击播放")) {
-                return text.trim()
-            }
+
+        // 收集所有候选歌词文本
+        val candidates = listOf(bigText, subText, infoText, tickerText)
+
+        for (text in candidates) {
+            if (text.isNullOrEmpty()) continue
+            val trimmed = text.trim()
+
+            // 必须与标题和歌手不同
+            if (trimmed == title || trimmed == artist) continue
+            if (trimmed.contains(title) && trimmed.length < title.length + 10) continue
+
+            // 排除非歌词文本
+            if (nonLyricKeywords.any { trimmed.contains(it, ignoreCase = true) }) continue
+
+            // 歌词长度通常在 2~200 字符之间
+            if (trimmed.length < 2 || trimmed.length > 200) continue
+
+            // 排除纯文件名路径
+            if (trimmed.contains(".mp3") || trimmed.contains(".flac") ||
+                trimmed.contains(".wav") || trimmed.contains("/storage")) continue
+
+            // 排除专辑信息（通常包含"专辑"或"album"）
+            if (trimmed.contains("专辑", ignoreCase = true) ||
+                trimmed.contains("album", ignoreCase = true)) continue
+
+            return trimmed
         }
-        
+
         return ""
     }
 
