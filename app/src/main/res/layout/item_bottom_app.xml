@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    底部应用列表单项布局
+    与 layout_bottom_nav.xml 中的固定导航项保持一致：
+    - 图标尺寸：@dimen/bottom_nav_icon_size
+    - 内边距：10dp（与固定项一致）
+    - 文字大小：@dimen/text_size_micro
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="60dp"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="?android:attr/selectableItemBackgroundBorderless"
-    android:padding="4dp">
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:background="?android:attr/selectableItemBackgroundBorderless">
 
     <ImageView
         android:id="@+id/iv_app_icon"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="@dimen/bottom_nav_icon_size"
+        android:layout_height="@dimen/bottom_nav_icon_size"
         android:src="@drawable/ic_apps" />
 
     <TextView
